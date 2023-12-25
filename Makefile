@@ -3,3 +3,8 @@ build:
 
 test:
 	busted spec/
+
+bench:
+	RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable.lua
+	RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-prefix.lua
+	RADIX_ROUTER_TIMES=1000000 luajit benchmark/github-routes.lua
