@@ -1,4 +1,4 @@
---- Todo style path parser.
+--- Default style path parser.
 --
 -- Parses the path into multiple tokens with patterns.
 --
