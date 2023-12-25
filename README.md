@@ -52,3 +52,45 @@ router:match("/users/100/profile-2023.pdf", nil, params)
 assert(params.year == "2023")
 assert(params.format == "pdf")
 ```
+
+## Methods
+
+### new
+Creates a radix router instance.
+
+```lua
+local router, err = Router.new(routes)
+```
+
+**Parameters**
+
+- **routes **(`table|nil`): the array-like Route table.
+
+
+
+Route defines the matching conditions for its handler.
+
+| PROPERTY                      | DESCRIPTION                                                  |
+| ----------------------------- | ------------------------------------------------------------ |
+| `paths`  *required\**         | The path list of matching condition.                         |
+| `methods` *optional*          | The method list of matching condition.                       |
+| `handler` *required\**        | The `handler` will be returned by `router:match()` when the route is matched. |
+| `expression` *optional* (TDB) | The `expression` defines a customized matching condition by using expression language. |
+
+
+
+### match
+
+Return the handler of a matched route that matches the path and condition ctx.
+
+```lua
+local handler = router:match(path, ctx, params)
+```
+
+**Parameters**
+
+- **path**(`string`): the path to use for matching.
+- **ctx**(`table|nil`): the optional condition ctx to use for matching.
+- **params**(`table|nil`): the optional table to use for storing the parameters binding result.
+
+# Benchmarks
