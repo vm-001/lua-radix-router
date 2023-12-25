@@ -1,9 +1,17 @@
-# Lua-radix-router
+# Lua-radix-router [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml)
 
-Lua-radix-router is a lightweight high performance router for Lua/LuaJIT.
+Lua-radix-router is a lightweight high-performance router written in Lua.
 
+It supports OpenAPI style variables path and prefix matching by using the ` { }` symbol. 
 
-## Installation
+-   `/users/{id}/profile-{year}.{format}`
+-   `/api/authn/{*path}`
+
+Parameter binding is also supported.
+
+The router is designed for high performance. A compressing dynamic trie (radix tree) is used for efficient matching. Even with millions of routes and complex paths, matching can still be done in 1 nanosecond. 
+
+## 🔨 Installation
 
 Install via LuaRocks:
 
@@ -11,7 +19,7 @@ Install via LuaRocks:
 luarocks install radix-router
 ```
 
-## Usage
+## 📖 Usage
 
 ```lua
 local Router = require "radix-router"
@@ -53,7 +61,7 @@ assert(params.year == "2023")
 assert(params.format == "pdf")
 ```
 
-## Methods
+## 📄 Methods
 
 ### new
 Creates a radix router instance.
@@ -64,7 +72,7 @@ local router, err = Router.new(routes)
 
 **Parameters**
 
-- **routes **(`table|nil`): the array-like Route table.
+- **routes**(`table|nil`): the array-like Route table.
 
 
 
@@ -74,7 +82,8 @@ Route defines the matching conditions for its handler.
 | ----------------------------- | ------------------------------------------------------------ |
 | `paths`  *required\**         | The path list of matching condition.                         |
 | `methods` *optional*          | The method list of matching condition.                       |
-| `handler` *required\**        | The `handler` will be returned by `router:match()` when the route is matched. |
+| `handler` *required\**        | The value of handler will be returned by `router:match()` when the route is matched. |
+| `priority` *optional*         | The priority of the route in case of radix tree node conflict. |
 | `expression` *optional* (TDB) | The `expression` defines a customized matching condition by using expression language. |
 
 
@@ -93,4 +102,7 @@ local handler = router:match(path, ctx, params)
 - **ctx**(`table|nil`): the optional condition ctx to use for matching.
 - **params**(`table|nil`): the optional table to use for storing the parameters binding result.
 
-# Benchmarks
+## 🚀 Benchmarks
+
+
+## License
