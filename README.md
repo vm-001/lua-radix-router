@@ -2,7 +2,7 @@
 
 Lua-radix-router is a lightweight high-performance router written in Lua.
 
-It supports OpenAPI style variables path and prefix matching by using the ` { }` symbol. 
+It supports OpenAPI style variables path and prefix matching by using the `{ }` symbol. 
 
 -   `/users/{id}/profile-{year}.{format}`
 -   `/api/authn/{*path}`
