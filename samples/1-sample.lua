@@ -1,19 +1,3 @@
-# Lua-radix-router
-
-Lua-radix-router is a lightweight high performance router for Lua/LuaJIT.
-
-
-## Installation
-
-Install via LuaRocks:
-
-```
-luarocks install radix-router
-```
-
-## Usage
-
-```lua
 local Router = require "radix-router"
 local router, err = Router.new({
   {
@@ -51,4 +35,3 @@ local params = {}
 router:match("/users/100/profile-2023.pdf", nil, params)
 assert(params.year == "2023")
 assert(params.format == "pdf")
-```
