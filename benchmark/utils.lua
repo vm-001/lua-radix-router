@@ -1,11 +1,12 @@
 local fmt = string.format
+
 local function timing(fn)
   local start_time = os.clock()
   fn()
   return os.clock() - start_time
 end
 
-local function print_result(result)
+local function print_result(result, items)
   print(fmt("========== %s ==========", result.title))
   print("routes  :", result.routes)
   print("times   :", result.times)
@@ -14,6 +15,9 @@ local function print_result(result)
   print("ns/op   :", result.elapsed * 1000 * 1000 / result.times .. " ns")
   print("path    :", result.benchmark_path)
   print("handler :", result.benchmark_handler)
+  for _, item in ipairs(items or {}) do
+    print(fmt("%s : %s", item.name, item.value))
+  end
   print()
 end
 
