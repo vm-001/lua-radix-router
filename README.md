@@ -104,5 +104,75 @@ local handler = router:match(path, ctx, params)
 
 ## 🚀 Benchmarks
 
+Environments:
+
+- Apple MacBook Pro(M1 Pro), 32GB 
+- LuaJIT 2.1.1700008891
+
+```
+$ make bench
+
+RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/static-paths.lua
+========== static path ==========
+routes  :       100000
+times   :       10000000
+elapsed :       0.120372 s
+QPS     :       83075798
+ns/op   :       0.0120372 ns
+path    :       /50000
+handler :       50000
+
+RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable.lua
+========== variable ==========
+routes  :       100000
+times   :       10000000
+elapsed :       0.823292 s
+QPS     :       12146358
+ns/op   :       0.0823292 ns
+path    :       /1/foo
+handler :       1
+
+RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-prefix.lua
+========== prefix ==========
+routes  :       100000
+times   :       10000000
+elapsed :       0.726753 s
+QPS     :       13759833
+ns/op   :       0.0726753 ns
+path    :       /1/a
+handler :       1
+
+RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=1000000 luajit benchmark/complex-variable.lua
+========== variable ==========
+routes  :       100000
+times   :       1000000
+elapsed :       0.922157 s
+QPS     :       1084414
+ns/op   :       0.922157 ns
+path    :       /aa/bb/cc/dd/ee/ff/gg/hh/ii/jj/kk/ll/mm/nn/oo/pp/qq/rr/ss/tt/uu/vv/ww/xx/yy/zz50000
+handler :       50000
+
+RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable-binding.lua
+========== variable ==========
+routes  :       100000
+times   :       10000000
+elapsed :       2.183163 s
+QPS     :       4580510
+ns/op   :       0.2183163 ns
+path    :       /1/foo
+handler :       1
+params : name = foo
+
+RADIX_ROUTER_TIMES=1000000 luajit benchmark/github-routes.lua
+========== github apis ==========
+routes  :       609
+times   :       1000000
+elapsed :       0.384233 s
+QPS     :       2602587
+ns/op   :       0.384233 ns
+path    :       /repos/vm-001/lua-radix-router/import
+handler :       /repos/{owner}/{repo}/import
+
+```
 
 ## License
