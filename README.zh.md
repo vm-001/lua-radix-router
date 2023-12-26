@@ -1,49 +1,49 @@
 # Lua-Radix-Router [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml) [![Coverage Status](https://coveralls.io/repos/github/vm-001/lua-radix-router/badge.svg)](https://coveralls.io/github/vm-001/lua-radix-router)
 
-English | [中文](README.zh.md)
+[English](README.md) | 中文 (Translated by ChatGPT)
 
 ---
 
-Lua-radix-router is a lightweight high-performance router written in Lua.
+Lua-radix-router 是一个用 Lua 编写的轻量级高性能路由器。
 
-It supports OpenAPI style variables path and prefix matching by using the `{ }` symbol. 
+它支持使用 `{ }` 符号进行 OpenAPI 风格的变量路径和前缀匹配。
 
--   `/users/{id}/profile-{year}.{format}`
--   `/api/authn/{*path}`
+- `/users/{id}/profile-{year}.{format}`
+- `/api/authn/{*path}`
 
-Parameter binding is also supported.
+还支持参数绑定。
 
-The router is designed for high performance. A compressing dynamic trie (radix tree) is used for efficient matching. Even with millions of routes and complex paths, matching can still be done in 1 nanosecond. 
+该路由器设计用于高性能。使用高效匹配的压缩动态字典树（radix tree）。即使有数百万条路由和复杂的路径，匹配仍可在1纳秒内完成。
 
-## 🔨 Installation
+## 🔨 安装
 
-Install via LuaRocks:
+通过 LuaRocks 安装：
 
 ```
 luarocks install radix-router
 ```
 
-## 📖 Usage
+## 📖 用法
 
 ```lua
 local Router = require "radix-router"
 local router, err = Router.new({
   {
     paths = { "/foo", "/foo/bar", "/html/index.html" },
-    handler = "1" -- handler can be any non-nil value. (e.g. boolean, table, function)
+    handler = "1" -- handler 可以是任何非nil的值。 (例如布尔值，表，函数)
   },
   {
-    -- variable path
+    -- 变量路径
     paths = { "/users/{id}/profile-{year}.{format}" },
     handler = "2"
   },
   {
-    -- prefix path
+    -- 前缀路径
     paths = { "/api/authn/{*path}" },
     handler = "3"
   },
   {
-    -- methods
+    -- 方法
     paths = { "/users/{id}" },
     methods = { "POST" },
     handler = "4"
@@ -58,68 +58,70 @@ assert("2" == router:match("/users/100/profile-2023.pdf"))
 assert("3" == router:match("/api/authn/token/genreate"))
 assert("4" == router:match("/users/100", { method = "POST" }))
 
--- parameter binding
+-- 参数绑定
 local params = {}
 router:match("/users/100/profile-2023.pdf", nil, params)
 assert(params.year == "2023")
 assert(params.format == "pdf")
 ```
 
-## 📄 Methods
+## 📄 方法
+
 
 ### new
 
-Creates a radix router instance.
+创建一个 radix 路由器实例。
 
 ```lua
 local router, err = Router.new(routes)
 ```
 
-**Parameters**
+**参数**
 
 - **routes**(`table|nil`): the array-like Route table.
 
 
 
-Route defines the matching conditions for its handler.
+路由定义了其处理程序的匹配条件:
 
-| PROPERTY                      | DESCRIPTION                                                  |
-| ----------------------------- | ------------------------------------------------------------ |
-| `paths`  *required\**         | The path list of matching condition.                         |
-| `methods` *optional*          | The method list of matching condition.                       |
-| `handler` *required\**        | The value of handler will be returned by `router:match()` when the route is matched. |
-| `priority` *optional*         | The priority of the route in case of radix tree node conflict. |
-| `expression` *optional* (TDB) | The `expression` defines a customized matching condition by using expression language. |
+| 属性                      | 描述                                 |
+| ----------------------------- |------------------------------------|
+| `paths`  *required\**         | 匹配条件的路径列表。                         |
+| `methods` *optional*          | 匹配条件的方法列表。                         |
+| `handler` *required\**        | 当路由匹配时，`router:match()` 将返回处理程序的值。 |
+| `priority` *optional*         | 在 radix 树节点冲突的情况下，路由的优先级。          |
+| `expression` *optional* (TDB) | `expression` 使用表达式语言定义的匹配条件        |
 
 
 
 ### match
 
-Return the handler of a matched route that matches the path and condition ctx.
+返回匹配路径和条件 ctx 的匹配路由的处理程序。
 
 ```lua
 local handler = router:match(path, ctx, params)
 ```
 
-**Parameters**
+**参数**
 
-- **path**(`string`): the path to use for matching.
-- **ctx**(`table|nil`): the optional condition ctx to use for matching.
-- **params**(`table|nil`): the optional table to use for storing the parameters binding result.
+- **path**(`string`): 用于匹配的路径。
+- **ctx**(`table|nil`): 用于匹配的可选条件 ctx。
+- **params**(`table|nil`): 用于存储参数绑定结果的可选表。
 
-## 🚀 Benchmarks
+## 🚀 基准测试
 
-Environments:
+环境:
 
-- Apple MacBook Pro(M1 Pro), 32GB 
+- Apple MacBook Pro(M1 Pro), 32GB
 - LuaJIT 2.1.1700008891
 
 ```
 $ make bench
 ```
 
+
 <details>
-<summary>Benchmarks Result</summary>
+<summary>测试结果</summary>
 
 ```
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/static-paths.lua
@@ -186,6 +188,3 @@ handler :       /repos/{owner}/{repo}/import
 ```
 
 </details>
-
-
-## License
