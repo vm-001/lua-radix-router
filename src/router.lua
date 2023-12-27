@@ -123,7 +123,7 @@ function Router:match(path, ctx, params)
   if routes then
     matched_route, matched_path = find_route(routes, ctx)
     if matched_route then
-      return matched_route.handler
+      return matched_route.handler, matched_path
     end
   end
 
@@ -152,7 +152,7 @@ function Router:match(path, ctx, params)
     if params then
       self.parser:update(matched_path):bind_params(path, path_n, params)
     end
-    return matched_route.handler
+    return matched_route.handler, matched_path
   end
 
   return nil
