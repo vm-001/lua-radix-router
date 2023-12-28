@@ -18,7 +18,7 @@ The router is designed for high performance. A compressing dynamic trie (radix t
     - `/api/authn/{*path}`
 
 - Variables binding: The router automatically injects the binding result for you during matching.
-- Best performance: The fastest router in Lua/LuaJIT. See [Benchmarks](#🚀 Benchmarks).
+- Best performance: The fastest router in Lua/LuaJIT. See [Benchmarks](#-Benchmarks).
 - OpenAPI friendly: Fully supports OpenAPI.
 
 
@@ -37,7 +37,7 @@ Install radix-router via LuaRocks:
 luarocks install radix-router
 ```
 
-Get started by a example:
+Get started by an example:
 
 ```lua
 local Router = require "radix-router"
