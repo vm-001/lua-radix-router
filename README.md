@@ -131,7 +131,7 @@ $ make build
 $ make bench
 ```
 
-#### Environments:
+#### Environments
 
 - Apple MacBook Pro(M1 Pro), 32GB 
 - LuaJIT 2.1.1700008891
