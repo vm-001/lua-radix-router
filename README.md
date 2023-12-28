@@ -4,46 +4,57 @@ English | [中文](README.zh.md)
 
 ---
 
-Lua-radix-router is a lightweight high-performance router written in Lua.
+Lua-Radix-Router is a lightweight high-performance router, written in pure Lua. The router is easy to use, with only two methods, `Router.new()` and `Router:match()`. It can be integrated into different runtimes such as Lua application, LuaJIT, or OpenResty.
 
-It supports OpenAPI style variables path and prefix matching by using the `{ }` symbol. 
 
--   `/users/{id}/profile-{year}.{format}`
--   `/api/authn/{*path}`
 
-Parameter binding is also supported.
+The router is designed for high performance. A compressing dynamic trie (radix tree) is used for efficient matching. Even with millions of routes containing complex paths, matching can still be done in 1 nanosecond. 
 
-The router is designed for high performance. A compressing dynamic trie (radix tree) is used for efficient matching. Even with millions of routes and complex paths, matching can still be done in 1 nanosecond. 
+## 🔨 Features
 
-## 🔨 Installation
+- Variables path: Syntax  `{varname}`. 
+    - `/users/{id}/profile-{year}.{format}`:  multiple variables in one path segment is allowed
+- Prefix matching: Syntax `{*varname}`.
+    - `/api/authn/{*path}`
 
-Install via LuaRocks:
+- Variables binding: The router automatically injects the binding result for you during matching.
+- Best performance: The fastest router in Lua/LuaJIT. See [Benchmarks](#🚀 Benchmarks).
+- OpenAPI friendly: Fully supports OpenAPI.
+
+
+
+**Features in the roadmap**: (star or create an issue to accelerate the priority)
+
+- Trailing slash match: Enables URL /foo/ to match with /foo paths.
+- Expression condition: defines custom matching conditions by using expression language.
+- Regex in variable
+
+## 📖 Getting started
+
+Install radix-router via LuaRocks:
 
 ```
 luarocks install radix-router
 ```
 
-## 📖 Usage
+Get started by a example:
 
 ```lua
 local Router = require "radix-router"
 local router, err = Router.new({
-  {
+  { -- static path
     paths = { "/foo", "/foo/bar", "/html/index.html" },
     handler = "1" -- handler can be any non-nil value. (e.g. boolean, table, function)
   },
-  {
-    -- variable path
+  { -- variable path
     paths = { "/users/{id}/profile-{year}.{format}" },
     handler = "2"
   },
-  {
-    -- prefix path
+  { -- prefix path
     paths = { "/api/authn/{*path}" },
     handler = "3"
   },
-  {
-    -- methods
+  { -- methods condition
     paths = { "/users/{id}" },
     methods = { "POST" },
     handler = "4"
@@ -58,12 +69,14 @@ assert("2" == router:match("/users/100/profile-2023.pdf"))
 assert("3" == router:match("/api/authn/token/genreate"))
 assert("4" == router:match("/users/100", { method = "POST" }))
 
--- parameter binding
+-- variable binding
 local params = {}
 router:match("/users/100/profile-2023.pdf", nil, params)
 assert(params.year == "2023")
 assert(params.format == "pdf")
 ```
+
+For more usage samples, please refer to the `/samples` directory.
 
 ## 📄 Methods
 
@@ -109,17 +122,33 @@ local handler = router:match(path, ctx, params)
 
 ## 🚀 Benchmarks
 
-Environments:
+#### Usage
+
+To run the benchmark
+
+```$ make bench
+$ make build
+$ make bench
+```
+
+#### Environments:
 
 - Apple MacBook Pro(M1 Pro), 32GB 
 - LuaJIT 2.1.1700008891
 
-```
-$ make bench
-```
+#### Results
+
+| TEST CASE               | Router number | nanoseconds / op | QPS        |
+| ----------------------- | ------------- | ---------------- | ---------- |
+| static path             | 100000        | 0.0120372        | 83,075,798 |
+| simple variable         | 100000        | 0.0823292        | 12,146,358 |
+| simple prefix           | 100000        | 0.0726753        | 13,759,833 |
+| complex variable        | 100000        | 0.922157         | 1,084,414  |
+| simple variable binding | 100000        | 0.2183163        | 4,580,510  |
+| github                  | 609           | 0.384233         | 2,602,587  |
 
 <details>
-<summary>Benchmarks Result</summary>
+<summary>Expand output</summary>
 
 ```
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/static-paths.lua
