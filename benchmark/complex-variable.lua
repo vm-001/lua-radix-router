@@ -16,6 +16,8 @@ do
   router = Router.new(routes)
 end
 
+local rss_mb = utils.get_rss()
+
 local path = "/aa/bb/cc/dd/ee/ff/gg/hh/ii/jj/kk/ll/mm/nn/oo/pp/qq/rr/ss/tt/uu/vv/ww/xx/yy/zz" .. route_n / 2
 
 local elapsed = utils.timing(function()
@@ -31,4 +33,5 @@ utils.print_result({
   elapsed = elapsed,
   benchmark_path = path,
   benchmark_handler = router:match(path),
+  rss = rss_mb,
 })

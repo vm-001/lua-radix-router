@@ -18,10 +18,39 @@ local function print_result(result, items)
   for _, item in ipairs(items or {}) do
     print(fmt("%s : %s", item.name, item.value))
   end
+  print("Memory  :", result.rss)
   print()
+end
+
+local function get_pid()
+  local ok, ffi = pcall(require, "ffi")
+  if ok then
+    ffi.cdef [[
+      int getpid(void);
+    ]]
+    return ffi.C.getpid()
+  end
+  return nil
+end
+
+local function get_rss()
+  collectgarbage("collect")
+
+  local pid = get_pid()
+  if not pid then
+    return "unable to get the pid"
+  end
+
+  local command = "ps -o rss= -p " .. tostring(pid)
+  local handle = io.popen(command)
+  local result = handle:read("*a")
+  handle:close()
+  local kbytes = tonumber(result) or 0
+  return fmt("%.2f MB", kbytes / 1024)
 end
 
 return {
   timing = timing,
   print_result = print_result,
+  get_rss = get_rss,
 }

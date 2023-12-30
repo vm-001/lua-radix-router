@@ -13,6 +13,8 @@ do
   router = Router.new(routes)
 end
 
+local rss_mb = utils.get_rss()
+
 local path = "/1/foo"
 local params = {}
 
@@ -29,6 +31,7 @@ utils.print_result({
   elapsed = elapsed,
   benchmark_path = path,
   benchmark_handler = router:match(path),
+  rss = rss_mb,
 }, {
   { name = "params", value = string.format("name = " .. params.name) }
 })
