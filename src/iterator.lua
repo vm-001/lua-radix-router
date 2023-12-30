@@ -6,13 +6,11 @@ local utils = require "radix-router.utils"
 local constants = require "radix-router.constatns"
 
 local starts_with = utils.starts_with
-
 local str_sub = string.sub
 local str_char = string.char
 local str_byte = string.byte
 
 local BYTE_SLASH = str_byte("/")
-
 local TYPE_VARIABLE = constants.node_types.variable
 local TYPE_CATCHALL = constants.node_types.catchall
 

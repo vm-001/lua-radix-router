@@ -26,7 +26,6 @@ end
 
 
 local starts_with
-local ends_with
 do
   if is_luajit then
     local ffi = require "ffi"
@@ -49,16 +48,6 @@ do
       local rc = C.memcmp(str, prefix, prefixn)
       return rc == 0
     end
-    ends_with = function(str, suffix)
-      if type(str) ~= "string" or type(suffix) ~= "string" then
-        return false
-      end
-      if #str < #suffix then
-        return false
-      end
-      local rc = C.memcmp(ffi.cast("char *", str) + #str - #suffix, suffix, #suffix)
-      return rc == 0
-    end
   else
     local str_sub = string.sub
     starts_with = function(str, prefix, strn, prefixn)
@@ -73,9 +62,6 @@ do
         return false
       end
       return str_sub(str, 1, prefixn) == prefix
-    end
-    ends_with = function(str, suffix)
-      error("TBD")
     end
   end
 end
@@ -111,6 +97,5 @@ return {
   clear_table = clear_table,
   new_table = new_table,
   is_luajit = is_luajit,
-  ends_with = ends_with,
   readonly = readonly
 }

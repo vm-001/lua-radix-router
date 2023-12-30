@@ -100,7 +100,7 @@ local function find_route(routes, ctx)
     end
     return nil, nil
   end
-  for n = 1, routes[0], 1 do
+  for n = 1, routes[0] do
     local route = routes[n][2]
     if route:is_match(ctx) then
       return route, routes[n][1]

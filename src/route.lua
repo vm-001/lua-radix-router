@@ -7,9 +7,9 @@ local bit = utils.is_luajit and require "bit"
 
 local ipairs = ipairs
 local str_byte = string.byte
+
 local BYTE_SLASH = str_byte("/")
 local is_luajit = utils.is_luajit
-
 local METHODS = {}
 do
   local methods = { "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH" }
@@ -26,7 +26,7 @@ local Route = {}
 local mt = { __index = Route }
 
 
-function Route.new(route, opts)
+function Route.new(route, _)
   if route.handler == nil then
     return nil, "handler must not be nil"
   end
