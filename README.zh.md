@@ -155,6 +155,7 @@ $ make bench
 | ----------------------- | ------------- |------------------|------------|--------------|
 | static path             | 100000        | 0.0129826        | 77,026,173 | 65.25 MB     |
 | simple variable         | 100000        | 0.0802077        | 12,467,630 | 147.52 MB    |
+| simple variable         | 1000000       | 0.084604         | 11,819,772 | 1381.47 MB   |
 | simple prefix           | 100000        | 0.0713651        | 14,012,451 | 147.47 MB    |
 | complex variable        | 100000        | 0.914117         | 1,093,951  | 180.30 MB    |
 | simple variable binding | 100000        | 0.21054          | 4,749,691  | 147.28 MB    |
@@ -185,6 +186,17 @@ ns/op   :	0.0802077 ns
 path    :	/1/foo
 handler :	1
 Memory  :	147.52 MB
+
+RADIX_ROUTER_ROUTES=1000000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable.lua
+========== variable ==========
+routes  :       1000000
+times   :       10000000
+elapsed :       0.84604 s
+QPS     :       11819772
+ns/op   :       0.084604 ns
+path    :       /1/foo
+handler :       1
+Memory  :       1381.47 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-prefix.lua
 ========== prefix ==========
