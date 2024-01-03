@@ -102,13 +102,14 @@ local router, err = Router.new(routes)
 
 Route defines the matching conditions for its handler.
 
-| PROPERTY                      | DESCRIPTION                                                  |
-| ----------------------------- | ------------------------------------------------------------ |
-| `paths`  *required\**         | The path list of matching condition.                         |
-| `methods` *optional*          | The method list of matching condition.                       |
-| `handler` *required\**        | The value of handler will be returned by `router:match()` when the route is matched. |
-| `priority` *optional*         | The priority of the route in case of radix tree node conflict. |
-| `expression` *optional* (TDB) | The `expression` defines a customized matching condition by using expression language. |
+| PROPERTY                      | DESCRIPTION                                                                                                                                                                              |
+|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `paths`</br> *required\**    | A list of paths that match the Route.</br>                                                                                                                                               |
+| `methods`</br> *optional*     | A list of HTTP methods that match the Route. </br>                                                                                                                                       |
+| `hosts`</br> *optional*            | A list of hostnames that match the Route. Note that the value is case-sensitive. Wildcard hostnames are supported. For example, `*.foo.com` can match with `a.foo.com` or `a.b.foo.com`. | 
+| `handler`</br> *required\**        | The value of handler will be returned by `router:match()` when the route is matched.                                                                                                     |
+| `priority`</br> *optional*         | The priority of the route in case of radix tree node conflict.                                                                                                                           |
+| `expression`</br> *optional* (TDB) | The `expression` defines a customized matching condition by using expression language.                                                                                                   |
 
 
 

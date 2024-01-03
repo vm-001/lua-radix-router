@@ -303,6 +303,72 @@ describe("Router", function()
         assert.equal("6", router:match("/prefix"))
       end)
     end)
+    describe("hosts", function()
+      it("exact host", function()
+        local router = Router.new({
+          {
+            paths = { "/single-host" },
+            handler = "1",
+            hosts = { "example.com" }
+          },
+          {
+            paths = { "/multiple-hosts" },
+            handler = "2",
+            hosts = { "foo.com", "bar.com" }
+          },
+        })
+        assert.equal("1", router:match("/single-host", { host = "example.com" }))
+        assert.equal(nil, router:match("/single-host", { host = "www.example.com" }))
+        assert.equal(nil, router:match("/single-host", { host = "example1.com" }))
+        assert.equal(nil, router:match("/single-host", { host = ".com" }))
+
+        assert.equal("2", router:match("/multiple-hosts", { host = "foo.com" }))
+        assert.equal("2", router:match("/multiple-hosts", { host = "bar.com" }))
+        assert.equal(nil, router:match("/multiple-hosts", { host = "example.com" }))
+      end)
+      it("wildcard host", function()
+        local router = Router.new({
+          {
+            paths = { "/" },
+            handler = "1",
+            hosts = { "*.example.com" }
+          },
+          {
+            paths = { "/" },
+            handler = "2",
+            hosts = { "www.example.*" }
+          },
+          {
+            paths = { "/multiple-hosts" },
+            handler = "3",
+            hosts = { "foo.com", "*.foo.com", "*.bar.com" }
+          },
+        })
+
+        assert.equal("1", router:match("/", { host = "www.example.com" }))
+        assert.equal("1", router:match("/", { host = "foo.bar.example.com" }))
+        assert.equal(nil, router:match("/", { host = ".example.com" }))
+
+        assert.equal("2", router:match("/", { host = "www.example.org" }))
+        assert.equal("2", router:match("/", { host = "www.example.foo.bar" }))
+        assert.equal(nil, router:match("/", { host = "www.example." }))
+
+        assert.equal("3", router:match("/multiple-hosts", { host = "foo.com" }))
+        assert.equal("3", router:match("/multiple-hosts", { host = "www.foo.com" }))
+        assert.equal("3", router:match("/multiple-hosts", { host = "www.bar.com" }))
+      end)
+      it("host value is case-sensitive", function()
+        local router = Router.new({
+          {
+            paths = { "/" },
+            hosts = { "example.com" },
+            handler = "1",
+          }
+        })
+        assert.equal("1", router:match("/", { host = "example.com" }))
+        assert.equal(nil, router:match("/", { host = "examplE.com" }))
+      end)
+    end)
   end)
   describe("match with params binding", function()
     it("sanity", function()
