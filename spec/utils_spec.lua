@@ -4,6 +4,7 @@ local utils = require "radix-router.utils"
 
 describe("utils", function()
   it("starts_with()", function()
+    assert.is_true(utils.starts_with("/abc", ""))
     assert.is_true(utils.starts_with("/abc", "/"))
     assert.is_true(utils.starts_with("/abc", "/a"))
     assert.is_true(utils.starts_with("/abc", "/ab"))
@@ -11,6 +12,20 @@ describe("utils", function()
 
     assert.is_false(utils.starts_with("/abc", "/abcd"))
     assert.is_false(utils.starts_with("/abc", "/d"))
+  end)
+  it("ends_with()", function()
+    assert.is_true(utils.ends_with("/abc", ""))
+    assert.is_true(utils.ends_with("/abc", "c"))
+    assert.is_true(utils.ends_with("/abc", "bc"))
+    assert.is_true(utils.ends_with("/abc", "abc"))
+    assert.is_true(utils.ends_with("/abc", "/abc"))
+
+    assert.is_false(utils.ends_with("/abc", "0abc"))
+    assert.is_false(utils.ends_with("/abc", "d"))
+
+    assert.is_true(utils.ends_with("example.com", ".com"))
+    assert.is_true(utils.ends_with("example.com", "*.com", nil, nil, 1))
+    assert.is_true(utils.ends_with("example.com", "*.com", nil, nil, 5))
   end)
   it("lcp()", function()
     assert.equal(0, utils.lcp("/abc", ""))

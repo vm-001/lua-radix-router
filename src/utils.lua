@@ -1,5 +1,6 @@
 local str_byte = string.byte
 local math_min = math.min
+local type = type
 
 local is_luajit = type(_G.jit) == "table"
 
@@ -26,6 +27,7 @@ end
 
 
 local starts_with
+local ends_with
 do
   if is_luajit then
     local ffi = require "ffi"
@@ -48,6 +50,22 @@ do
       local rc = C.memcmp(str, prefix, prefixn)
       return rc == 0
     end
+    ends_with = function(str, suffix, strn, suffixn, suffix_skip)
+      strn = strn or #str
+      suffix_skip = suffix_skip or 0
+      suffixn = (suffixn or #suffix) - suffix_skip
+
+      if suffixn == 0 then
+        return true
+      end
+
+      if strn < suffixn then
+        return false
+      end
+
+      local rc = C.memcmp(ffi.cast("char *", str) + strn - suffixn, ffi.cast("char *", suffix) + suffix_skip, suffixn)
+      return rc == 0
+    end
   else
     local str_sub = string.sub
     starts_with = function(str, prefix, strn, prefixn)
@@ -62,6 +80,21 @@ do
         return false
       end
       return str_sub(str, 1, prefixn) == prefix
+    end
+    ends_with = function(str, suffix, strn, suffixn, suffix_skip)
+      strn = strn or #str
+      suffix_skip = suffix_skip or 0
+      suffixn = (suffixn or #suffix) - suffix_skip
+
+      if suffixn == 0 then
+        return true
+      end
+
+      if strn < suffixn then
+        return false
+      end
+
+      return str_sub(str, -suffixn) == str_sub(suffix, 1 + suffix_skip)
     end
   end
 end
@@ -94,8 +127,9 @@ end
 return {
   lcp = lcp,
   starts_with = starts_with,
+  ends_with = ends_with,
   clear_table = clear_table,
   new_table = new_table,
   is_luajit = is_luajit,
-  readonly = readonly
+  readonly = readonly,
 }
