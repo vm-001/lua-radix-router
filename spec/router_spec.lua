@@ -357,6 +357,17 @@ describe("Router", function()
         assert.equal("3", router:match("/multiple-hosts", { host = "www.foo.com" }))
         assert.equal("3", router:match("/multiple-hosts", { host = "www.bar.com" }))
       end)
+      it("host value is case-sensitive", function()
+        local router = Router.new({
+          {
+            paths = { "/" },
+            hosts = { "example.com" },
+            handler = "1",
+          }
+        })
+        assert.equal("1", router:match("/", { host = "example.com" }))
+        assert.equal(nil, router:match("/", { host = "examplE.com" }))
+      end)
     end)
   end)
   describe("match with params binding", function()
