@@ -79,7 +79,14 @@ do
       if strn < prefixn then
         return false
       end
-      return str_sub(str, 1, prefixn) == prefix
+
+      for i = 1, prefixn do
+        if str_byte(str, i) ~= str_byte(prefix, i) then
+          return false
+        end
+      end
+
+      return true
     end
     ends_with = function(str, suffix, strn, suffixn, suffix_skip)
       strn = strn or #str
