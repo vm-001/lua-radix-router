@@ -126,6 +126,7 @@ local handler = router:match(path, ctx, params)
 - **path**(`string`): the path to use for matching.
 - **ctx**(`table|nil`): the optional condition ctx to use for matching.
 - **params**(`table|nil`): the optional table to use for storing the parameters binding result.
+- **matched**(`table|nil`): the optional table to use for storing the matched conditions.
 
 ## 🚀 Benchmarks
 

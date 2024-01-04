@@ -92,20 +92,22 @@ function Router.new(routes, options)
 end
 
 
-local function find_route(routes, ctx)
+local function find_route(routes, ctx, matched)
   if routes[0] == 1 then
     local route = routes[1][2]
-    if route:is_match(ctx) then
+    if route:is_match(ctx, matched) then
       return route, routes[1][1]
     end
     return nil, nil
   end
+
   for n = 1, routes[0] do
     local route = routes[n][2]
-    if route:is_match(ctx) then
+    if route:is_match(ctx, matched) then
       return route, routes[n][1]
     end
   end
+
   return nil, nil
 end
 
@@ -114,15 +116,19 @@ end
 -- @string path the path
 -- @tab ctx the condition ctx
 -- @tab params table to store the parameters
-function Router:match(path, ctx, params)
+-- @tab matched table to store the matched condition
+function Router:match(path, ctx, params, matched)
   ctx = ctx or EMPTY
 
   local matched_route, matched_path
 
   local routes = self.static[path]
   if routes then
-    matched_route, matched_path = find_route(routes, ctx)
+    matched_route, matched_path = find_route(routes, ctx, matched)
     if matched_route then
+      if matched then
+        matched.path = matched_path
+      end
       return matched_route.handler
     end
   end
@@ -136,8 +142,11 @@ function Router:match(path, ctx, params)
     local values, count = self.iterator:find(node, state_path, state_path_n)
     if values then
       for n = count, 1, -1 do
-        matched_route, matched_path = find_route(values[n], ctx)
+        matched_route, matched_path = find_route(values[n], ctx, matched)
         if matched_route then
+          if matched then
+            matched.path = matched_path
+          end
           break
         end
       end

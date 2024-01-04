@@ -493,4 +493,38 @@ describe("Router", function()
       assert.equal("1", router:match("/aa/bb"))
     end)
   end)
+  describe("match with matched", function()
+    it("sanity", function()
+      local router = Router.new({
+        {
+          paths = { "/static" },
+          methods = { "GET" },
+          hosts = { "example.com" },
+          handler = "1",
+        },
+        {
+          paths = { "/a/{var}", "/b/{var}" },
+          methods = { "POST", "PUT" },
+          hosts = { "*.example.com" },
+          handler = "2",
+        },
+      })
+
+      local matched = {}
+      assert.equal("1", router:match("/static", { method = "GET", host = "example.com" }, nil, matched))
+      assert.same({
+        path = "/static",
+        host = "example.com",
+        method = "GET",
+      }, matched)
+
+      local matched = {}
+      assert.equal("2", router:match("/b/var", { method = "PUT", host = "www.example.com" }, nil, matched))
+      assert.same({
+        path = "/b/{var}",
+        host = "*.example.com",
+        method = "PUT",
+      }, matched)
+    end)
+  end)
 end)
