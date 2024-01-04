@@ -91,7 +91,7 @@ function Route.new(route, _)
 end
 
 
-function Route:is_match(ctx)
+function Route:is_match(ctx, matched)
   if self.method then
     local method = ctx.method
     if not method or METHODS[method] == nil then
@@ -105,6 +105,10 @@ function Route:is_match(ctx)
       if not self.method[method] then
         return false
       end
+    end
+
+    if matched then
+      matched.method = method
     end
   end
 
@@ -120,9 +124,10 @@ function Route:is_match(ctx)
 
       local wildcard_match = false
       local host_n = #host
+      local wildcard_host, wildcard_host_n
       for i = 1, self.hosts[0] do
-        local wildcard_host = self.hosts[i]
-        local wildcard_host_n = #wildcard_host
+        wildcard_host = self.hosts[i]
+        wildcard_host_n = #wildcard_host
         if host_n >= wildcard_host_n then
           if str_byte(wildcard_host) == BYTE_ASTERISK then
             -- case *.example.com
@@ -141,6 +146,13 @@ function Route:is_match(ctx)
       end
       if not wildcard_match then
         return false
+      end
+      if matched then
+        matched.host = wildcard_host
+      end
+    else
+      if matched then
+        matched.host = host
       end
     end
   end
