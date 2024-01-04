@@ -118,7 +118,7 @@ Route defines the matching conditions for its handler.
 Return the handler of a matched route that matches the path and condition ctx.
 
 ```lua
-local handler = router:match(path, ctx, params)
+local handler = router:match(path, ctx, params, matched)
 ```
 
 **Parameters**
