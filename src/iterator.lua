@@ -18,8 +18,9 @@ local _M = {}
 local mt = { __index = _M }
 
 
-function _M.new()
+function _M.new(options)
   local self = {
+    trailing_slash_match = options.trailing_slash_match,
     stack_node = {},
     stack_paths = {},
     stack_pathns = {},
@@ -65,6 +66,7 @@ function _M:find(node, path, path_n)
   local first_char
   local has_variable
   local matched_n = 0
+  local trailing_slash_match = self.trailing_slash_match
 
   -- luacheck: ignore
   while true do
@@ -81,9 +83,14 @@ function _M:find(node, path, path_n)
         i = n
       end
       if i < path_n then
+        path = str_sub(path, i + 1)
+        path_n = path_n - i
+        if trailing_slash_match and path == "/" and node.value then
+          -- matched when path has a extra slash
+          matched_n = matched_n + 1
+          self.values[matched_n] = node.value
+        end
         if node.n > 0 then
-          path = str_sub(path, i + 1)
-          path_n = path_n - i
           first_char = str_sub(path, 1, 1)
           child = node.children[first_char]
           if child then
@@ -101,6 +108,15 @@ function _M:find(node, path, path_n)
       -- case1: the node doesn't contians child to match to the path
       -- case2: the path is variable value, but current node doesn't have value
       if not_found then
+        if trailing_slash_match and node.children then
+          -- look up the children to see if "/" child with value exists
+          child = node.children["/"]
+          if child and child.value then
+            matched_n = matched_n + 1
+            self.values[matched_n] = child.value
+          end
+        end
+
         break
       end
     end
@@ -124,9 +140,9 @@ function _M:find(node, path, path_n)
         has_variable = false
         child = node.children and node.children[TYPE_VARIABLE]
         if child then
-          -- current node has variable child,
-          -- but we don't know whether the path can finally match
-          -- store states
+          -- node has a variable child, but we don't know whether
+          -- the path can finally match the path.
+          -- therefore, record the state(node, path, path_n) to be used later.
           self:push(child, path, path_n)
           has_variable = true
         end
@@ -143,6 +159,11 @@ function _M:find(node, path, path_n)
           node = self:prev()
           goto continue
         end
+
+        if trailing_slash_match and path == "/" and node.value then
+          matched_n = matched_n + 1
+          self.values[matched_n] = node.value
+        end
       end
     elseif path == node_path then
       -- considers matched if this node has catchall child
@@ -153,6 +174,13 @@ function _M:find(node, path, path_n)
       end
 
       if node.value then
+        matched_n = matched_n + 1
+        self.values[matched_n] = node.value
+      end
+    else
+      -- #path < #node_path
+      if trailing_slash_match and path_n == node_path_n - 1
+        and str_byte(node_path, node_path_n) == BYTE_SLASH and node.value then
         matched_n = matched_n + 1
         self.values[matched_n] = node.value
       end

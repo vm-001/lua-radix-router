@@ -12,20 +12,18 @@ The router is designed for high performance. A compressing dynamic trie (radix t
 
 ## 🔨 Features
 
-- Variables path: Syntax  `{varname}`. 
+- **Variables in path**: Syntax  `{varname}`. 
     - `/users/{id}/profile-{year}.{format}`:  multiple variables in one path segment is allowed
-- Prefix matching: Syntax `{*varname}`.
+- **Prefix matching**: Syntax `{*varname}`.
     - `/api/authn/{*path}`
 
-- Variables binding: The router automatically injects the binding result for you during matching.
-- Best performance: The fastest router in Lua/LuaJIT. See [Benchmarks](#-Benchmarks).
-- OpenAPI friendly: Fully supports OpenAPI.
+- **Variables binding**: The router automatically injects the binding result for you during matching.
+- **Best performance**: The fastest router in Lua/LuaJIT. See [Benchmarks](#-Benchmarks).
+- **OpenAPI friendly**: OpenAPI(Swagger) fully compatible.
+- **Trailing slash match**: You can make the Router to ignore the trailing slash by setting `trailing_slash_match` to true. For example, /foo/ to match the existing /foo, /foo to match the existing /foo/.
 
+**Features in the roadmap**:
 
-
-**Features in the roadmap**: (star or create an issue to accelerate the priority)
-
-- Trailing slash match: Enables URL /foo/ to match with /foo paths.
 - Expression condition: defines custom matching conditions by using expression language.
 - Regex in variable
 
@@ -91,14 +89,22 @@ For more usage samples, please refer to the `/samples` directory.
 Creates a radix router instance.
 
 ```lua
-local router, err = Router.new(routes)
+local router, err = Router.new(routes, opts)
 ```
 
 **Parameters**
 
-- **routes**(`table|nil`): the array-like Route table.
+- **routes** (`table|nil`): the array-like Route table.
 
+- **opts** (table|nil): the object-like Options table.
 
+    The available options are as follow
+
+    | NAME                 | DESCRIPTION                  | DEFAULT |
+    | -------------------- | ---------------------------- | ------- |
+    | trailing_slash_match | Enables trailing slash match | false   |
+
+    
 
 Route defines the matching conditions for its handler.
 

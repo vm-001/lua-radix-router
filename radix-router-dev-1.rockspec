@@ -29,6 +29,7 @@ build = {
   type = "builtin",
   modules = {
     ["radix-router"] = "src/router.lua",
+    ["radix-router.options"] = "src/options.lua",
     ["radix-router.route"] = "src/route.lua",
     ["radix-router.trie"] = "src/trie.lua",
     ["radix-router.utils"] = "src/utils.lua",
