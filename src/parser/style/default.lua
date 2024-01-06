@@ -15,6 +15,7 @@ local BYTE_COLON = byte(":")
 local BYTE_ASTERISK = byte("*")
 local BYTE_LEFT_BRACKET = byte("{")
 local BYTE_RIGHT_BRACKET = byte("}")
+local BYTE_SLASH = byte("/")
 
 local TOKEN_TYPES = constants.token_types
 
@@ -161,13 +162,18 @@ function _M:params()
 end
 
 
-function _M:bind_params(req_path, req_path_n, params)
+function _M:bind_params(req_path, req_path_n, params, trailing_slash_mode)
+  if not params then
+    return
+  end
+
   local path = self.path
   local path_n = self.path_n
   local pos, anchor, path_start = 1, 1, 0
   local state, char, param_n
   while pos <= path_n do
     char = byte(path, pos)
+    -- local debug = string.char(char)
     if state == nil or state == STATES.static then
       if char == BYTE_LEFT_BRACKET then
         if state == STATES.static then
@@ -225,7 +231,11 @@ function _M:bind_params(req_path, req_path_n, params)
       end
     end
     if param_n > 0 then
-      params[param_name] = sub(req_path, path_start)
+      if trailing_slash_mode and byte(req_path, -1) == BYTE_SLASH then
+        params[param_name] = sub(req_path, path_start, path_n - 1)
+      else
+        params[param_name] = sub(req_path, path_start)
+      end
     end
   end
 end

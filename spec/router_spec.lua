@@ -10,10 +10,14 @@ describe("Router", function()
       assert.not_nil(router)
     end)
     it("new() with routes argument", function()
+      local router, err = Router.new({})
+      assert.is_nil(err)
+      assert.not_nil(router)
+
       local router, err = Router.new({
         {
           paths = { "/" },
-          handler = "/"
+          handler = "/",
         }
       })
       assert.is_nil(err)
@@ -52,6 +56,14 @@ describe("Router", function()
       })
       assert.is_nil(router)
       assert.equal("invalid route(index 1): invalid methond", err)
+    end)
+    it("new() with opts argument", function()
+      local router, err = Router.new({}, {
+        trailing_slash_match = true
+      })
+      assert.is_nil(err)
+      assert.not_nil(router)
+      assert.equal(true, router.options.trailing_slash_match)
     end)
   end)
   describe("match", function()
@@ -525,6 +537,102 @@ describe("Router", function()
         host = "*.example.com",
         method = "PUT",
       }, matched)
+    end)
+  end)
+  describe("trailing slash match", function()
+    it("sanity", function()
+      local options = {
+        trailing_slash_match = true,
+      }
+
+      local router = Router.new({
+        -- static routes
+        {
+          paths = { "/static1" },
+          handler = "static1",
+        },
+        {
+          paths = { "/static2/" },
+          handler = "static2",
+        },
+        -- variable in the middle
+        {
+          paths = { "/users/{id}/profile" },
+          handler = "0",
+        },
+        {
+          paths = { "/pets/{id}/profile/" },
+          handler = "1",
+        },
+        -- variable at the end
+        {
+          paths = { "/zz/{id}" },
+          handler = "2",
+        },
+        {
+          paths = { "/ww/{id}/" },
+          handler = "3",
+        },
+      }, options)
+
+      assert.equal("static1", router:match("/static1/"))
+      assert.equal("static2", router:match("/static2"))
+
+      -- matched when path has a extra trailing slash
+      assert.equal("0", router:match("/users/1/profile/"))
+      -- matched when path misses trailing slash
+      assert.equal("1", router:match("/pets/1/profile"))
+
+      -- matched when path has a extra trailing slash
+      assert.equal("2", router:match("/zz/1/"))
+      -- matched when path misses trailing slash
+      assert.equal("3", router:match("/ww/1"))
+    end)
+    it("with methods condition", function()
+      local options = {
+        trailing_slash_match = true,
+      }
+
+      local router = Router.new({
+        {
+          paths = { "/a/{var}" },
+          methods = { "GET" },
+          handler = "10",
+        },
+        {
+          paths = { "/a/{var}/" },
+          methods = { "POST" },
+          handler = "20",
+        },
+        {
+          paths = { "/bb/{var}/foo" },
+          methods = { "GET" },
+          handler = "30",
+        },
+        {
+          paths = { "/bb/{var}/bar" },
+          methods = { "GET" },
+          handler = "40",
+        },
+      }, options)
+
+      -- exact match
+      assert.equal("10", router:match("/a/var", { method = "GET" }))
+      -- matched when path has a extra trailing slash
+      assert.equal("10", router:match("/a/var/", { method = "GET" }))
+
+      -- exact match
+      assert.equal("20", router:match("/a/var/", { method = "POST" }))
+      -- matched when path misses trailing slash
+      assert.equal("20", router:match("/a/var", { method = "POST" }))
+
+      -- the prepreerence for path /a/var is handle 10, but the method is not matched
+      assert.equal("20", router:match("/a/var", { method = "POST" }))
+      -- the prepreerence for path /a/var/ is handle 20, but the method is not matched
+      assert.equal("10", router:match("/a/var/", { method = "GET" }))
+
+      assert.equal("30", router:match("/bb/var/foo/", {  method = "GET" }))
+      assert.equal("40", router:match("/bb/var/bar/", {  method = "GET" }))
     end)
   end)
 end)

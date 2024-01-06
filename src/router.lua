@@ -6,15 +6,18 @@ local Trie = require "radix-router.trie"
 local Route = require "radix-router.route"
 local Parser = require "radix-router.parser"
 local Iterator = require "radix-router.iterator"
+local Options = require "radix-router.options"
 local utils = require "radix-router.utils"
 
 local ipairs = ipairs
+local str_byte = string.byte
+local str_sub = string.sub
+
+local BYTE_SLASH = str_byte("/")
+local EMPTY = utils.readonly({})
 
 local Router = {}
 local mt = { __index = Router }
-
-local EMPTY = utils.readonly({})
-
 
 local function add_route(self, path, route)
   local path_route = { path, route }
@@ -55,14 +58,14 @@ end
 
 
 --- new a Router instance
--- @tab routes
--- @tab options
-function Router.new(routes, options)
+-- @tab routes routes table
+-- @tab otps options table
+function Router.new(routes, opts)
   if routes ~= nil and type(routes) ~= "table" then
     return nil, "invalid argument: routes"
   end
 
-  options = options or EMPTY
+  local options = Options.options(opts)
   routes = routes or EMPTY
 
   local self = {
@@ -70,7 +73,7 @@ function Router.new(routes, options)
     parser = Parser.new("default"),
     static = {},
     trie = Trie.new(),
-    iterator = Iterator.new(),
+    iterator = Iterator.new(options),
   }
 
   local route_opts = {
@@ -120,6 +123,7 @@ end
 function Router:match(path, ctx, params, matched)
   ctx = ctx or EMPTY
 
+  local trailing_slash_match = self.options.trailing_slash_match
   local matched_route, matched_path
 
   local routes = self.static[path]
@@ -133,6 +137,22 @@ function Router:match(path, ctx, params, matched)
     end
   end
 
+  if trailing_slash_match then
+    if str_byte(path, -1) == BYTE_SLASH then
+      routes = self.static[str_sub(path, 1, -2)]
+    else
+      routes = self.static[path .. "/"]
+    end
+    if routes then
+      matched_route, matched_path = find_route(routes, ctx, matched)
+      if matched_route then
+        if matched then
+          matched.path = matched_path
+        end
+        return matched_route.handler
+      end
+    end
+  end
 
   local path_n = #path
   local node = self.trie
@@ -159,7 +179,7 @@ function Router:match(path, ctx, params, matched)
 
   if matched_route then
     if params then
-      self.parser:update(matched_path):bind_params(path, path_n, params)
+      self.parser:update(matched_path):bind_params(path, path_n, params, trailing_slash_match)
     end
     return matched_route.handler
   end

@@ -39,5 +39,29 @@ describe("parser", function()
         assert.same(expected_params, params)
       end
     end)
+    it("bind_params() with trailing_slash_mode", function()
+      local tests = {
+        {
+          path = "/a/var1/",
+          matched_path = "/a/{var}",
+          params = {
+            var = "var1"
+          },
+        },
+        {
+          path = "/a/var1",
+          matched_path = "/a/{var}/",
+          params = {
+            var = "var1"
+          },
+        }
+      }
+      for i, test in pairs(tests) do
+        local parser = Parser.new("default")
+        local params = {}
+        parser:update(test.matched_path):bind_params(test.path, #test.path, params, true)
+        assert.same(test.params, params, "assertion failed: " .. i)
+      end
+    end)
   end)
 end)
