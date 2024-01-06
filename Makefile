@@ -1,8 +1,11 @@
 build:
 	luarocks make
 
-test:
-	busted spec/
+test: build
+	#busted spec/
+	luajit spec/parser_spec.lua
+	luajit spec/router_spec.lua
+	luajit spec/utils_spec.lua
 
 test-coverage:
 	busted --coverage spec/
