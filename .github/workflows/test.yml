@@ -57,4 +57,4 @@ jobs:
 
       - name: benchmark
         run: |
-          make bench
+          make bench CMD=lua
