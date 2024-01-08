@@ -19,7 +19,7 @@ do
   end
   ok, new_table = pcall(require, "table.new")
   if not ok then
-    new_table = function()
+    new_table = function(narr , nrec)
       return {}
     end
   end

@@ -21,11 +21,11 @@ local mt = { __index = _M }
 function _M.new(options)
   local self = {
     trailing_slash_match = options.trailing_slash_match,
-    stack_node = {},
-    stack_paths = {},
-    stack_pathns = {},
+    stack_node = utils.new_table(4, 0),
+    stack_paths = utils.new_table(4, 0),
+    stack_pathns = utils.new_table(4, 0),
     stack_n = 0,
-    values = {},
+    values = utils.new_table(4, 0),
   }
 
   return setmetatable(self, mt)
