@@ -42,7 +42,7 @@ local function add_route(self, path, route)
   end
 
   -- dynamic path
-  self.trie:add(path, nil, function(node)
+  Trie.add(self.trie, path, nil, function(node)
     local routes = node[idx.value]
     if not routes then
       node[idx.value] = { [0] = 1, path_route }
