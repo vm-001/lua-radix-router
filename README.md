@@ -27,6 +27,7 @@ The router is designed for high performance. A compressing dynamic trie (radix t
 - Expression condition: defines custom matching conditions by using expression language.
 - Regex in variable
 
+
 ## 📖 Getting started
 
 Install radix-router via LuaRocks:
@@ -135,6 +136,81 @@ local handler = router:match(path, ctx, params, matched)
 - **ctx**(`table|nil`): the optional condition ctx to use for matching.
 - **params**(`table|nil`): the optional table to use for storing the parameters binding result.
 - **matched**(`table|nil`): the optional table to use for storing the matched conditions.
+
+## 🧠 Data Structure and Implementation
+
+Inside the Router, it has a hash-like table to optimize the static path matching. Due to the LuaJIT optimization, static path matching is the fastest and has lower memory usage. (see [Benchmarks](#-Benchmarks))
+
+The Router also has a tree structure for patterned path matching. The tree is basically a compact [prefix tree](https://en.wikipedia.org/wiki/Trie) (or [Radix Tree](https://en.wikipedia.org/wiki/Radix_tree)). The primary structure of Router is as follows:
+
+```
+{
+  static<Table>   = {},
+  trie<TrieNode>  = TrieNode.new(),
+  ...
+}
+
++--------+----------+------------------------------------+
+| FIELD  |   TYPE   |                DESC                |
++--------+----------+------------------------------------+
+| static | table    | a hash-like table for static paths |
+| trie   | TrieNode | a radix tree for pattern paths     |
++--------+----------+------------------------------------+
+```
+
+TrieNode is an array-like table. Compared with the hash-like, it reduces memory usage by 20%. The data structure of TrieNode is:
+
+```
+{ <type>, <path>, <pathn>, <children>, <value> }
+
++-------+----------+------------------+
+| INDEX |   NAME   |       TYPE       |
++-------+----------+------------------+
+|     1 | type     | integer          |
+|     2 | path     | string           |
+|     3 | pathn    | integer          |
+|     4 | children | hash-like table  |
+|     5 | value    | array-like table |
++-------+----------+------------------+
+```
+
+Nodes with a common prefix share a common parent. Here is an example of what a Router with three routes could look like:
+
+```lua
+local router = Router.new({
+  { -- <table 1>
+    paths = { "/api/login" },
+    handler = "1",
+  }, { -- <table 2>
+    paths = { "/people/{id}/profile" },
+    handler = "2",
+  }, { -- <table 3>
+    paths = { "/search/{query}", "/src/{*filename}" },
+    handler = "3"
+  }
+})
+```
+
+
+
+
+```
+router.static = {
+  [/api/login] = { *<table 1> }
+}
+
+              TrieNode.path       TrieNode.value                   
+router.trie = /                   nil
+              ├─people/           nil
+              │ └─{wildcard}      nil
+              │   └─/profile      { "/people/{id}/profile",  *<table 2> }
+              └─s                 nil
+               ├─earch/           nil
+               │ └─{wildcard}     { "/search/{query}",       *<table 3> }
+               └─rc/              nil
+                 └─{catchall}     { "/src/{*filename}",      *<table 3> }
+```
+
 
 ## 🚀 Benchmarks
 
