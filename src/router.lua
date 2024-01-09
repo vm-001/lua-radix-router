@@ -8,10 +8,12 @@ local Parser = require "radix-router.parser"
 local Iterator = require "radix-router.iterator"
 local Options = require "radix-router.options"
 local utils = require "radix-router.utils"
+local constants = require "radix-router.constatns"
 
 local ipairs = ipairs
 local str_byte = string.byte
 local str_sub = string.sub
+local idx = constants.node_indexs
 
 local BYTE_SLASH = str_byte("/")
 local EMPTY = utils.readonly({})
@@ -41,9 +43,9 @@ local function add_route(self, path, route)
 
   -- dynamic path
   self.trie:add(path, nil, function(node)
-    local routes = node.value
+    local routes = node[idx.value]
     if not routes then
-      node.value = { [0] = 1, path_route }
+      node[idx.value] = { [0] = 1, path_route }
       return
     end
     routes[0] = routes[0] + 1

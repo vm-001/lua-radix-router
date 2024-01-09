@@ -54,3 +54,7 @@ jobs:
         run: luacov-coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ github.token }}
+
+      - name: benchmark
+        run: |
+          make bench CMD=lua

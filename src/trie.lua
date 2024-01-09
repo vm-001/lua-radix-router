@@ -9,26 +9,21 @@ local str_sub = string.sub
 local lcp = utils.lcp
 local type = type
 
-local EMPTY = utils.readonly({})
 local TOKEN_TYPES = constants.token_types
 local TYPES = constants.node_types
+local idx = constants.node_indexs
 
 local TrieNode = {}
 local mt = { __index = TrieNode }
 
-
-function TrieNode.new(o)
-  o = o or EMPTY
-
+function TrieNode.new(node_type, path, children, value)
   local self = {
-    path = o.path,
-    path_n = o.path and #o.path or 0,
-    children = o.children,
-    n = o.n or 0,
-    type = o.type,
-    value = o.value,
+    node_type,
+    path,
+    path and #path or 0,
+    children,
+    value,
   }
-
   return setmetatable(self, mt)
 end
 
@@ -47,26 +42,25 @@ local function insert(node, path, value, fn, parser)
   local token, token_type = parser:next()
   while token do
     if token_type == TOKEN_TYPES.variable then
-      node.type = TYPES.variable
-      node.path_n = 0
+      node[idx.type] = TYPES.variable
+      node[idx.pathn] = 0
     elseif token_type == TOKEN_TYPES.catchall then
-      node.type = TYPES.catchall
-      node.path_n = 0
+      node[idx.type] = TYPES.catchall
+      node[idx.pathn] = 0
     else
-      node.type = TYPES.literal
-      node.path = token
-      node.path_n = #token
+      node[idx.type] = TYPES.literal
+      node[idx.path] = token
+      node[idx.pathn] = #token
     end
 
     token, token_type = parser:next()
     if token then
       local child = TrieNode.new()
-      node.n = node.n + 1
       if token_type == TOKEN_TYPES.literal then
         local char = str_sub(token, 1, 1)
-        node.children = { [char] = child }
+        node[idx.children] = { [char] = child }
       else
-        node.children = { [token_type] = child }
+        node[idx.children] = { [token_type] = child }
       end
       node = child
     end
@@ -77,26 +71,24 @@ end
 
 
 local function split(node, path, prefix_n)
-  local child = TrieNode.new({
-    path = str_sub(node.path, prefix_n + 1),
-    n = node.n,
-    type = TYPES.literal,
-    value = node.value,
-    children = node.children,
-  })
+  local child = TrieNode.new(
+    TYPES.literal,
+    str_sub(node[idx.path], prefix_n + 1),
+    node[idx.children],
+    node[idx.value]
+  )
 
   -- update current node
-  node.path = str_sub(path, 1, prefix_n)
-  node.path_n = #node.path
-  node.n = 1
-  node.type = TYPES.literal
-  node.value = nil
-  node.children = { [str_sub(child.path, 1, 1)] = child }
+  node[idx.type] = TYPES.literal
+  node[idx.path] = str_sub(path, 1, prefix_n)
+  node[idx.pathn] = #node[idx.path]
+  node[idx.value] = nil
+  node[idx.children] = { [str_sub(child[idx.path], 1, 1)] = child }
 end
 
 
 function TrieNode:add(path, value, fn, parser)
-  if not self.path and not self.type then
+  if not self[idx.path] and not self[idx.type] then
     -- insert to current empty node
     insert(self, path, value, fn, parser)
     return
@@ -105,20 +97,20 @@ function TrieNode:add(path, value, fn, parser)
   local node = self
   local token, token_type
   while true do
-    local common_prefix_n = lcp(node.path, path)
+    local common_prefix_n = lcp(node[idx.path], path)
 
-    if common_prefix_n < node.path_n then
+    if common_prefix_n < node[idx.pathn] then
       split(node, path, common_prefix_n)
     end
 
     if common_prefix_n < #path then
-      if node.type == TYPES.variable then
+      if node[idx.type] == TYPES.variable then
         -- token must a variable
         path = str_sub(path, #token + 1)
         if #path == 0 then
           break
         end
-      elseif node.type == TYPES.catchall then
+      elseif node[idx.type] == TYPES.catchall then
         -- token must a catchall
         -- catchall node matches entire path
         break
@@ -127,17 +119,17 @@ function TrieNode:add(path, value, fn, parser)
       end
 
       local child
-      if node.children then
+      if node[idx.children] then
         local first_char = str_sub(path, 1, 1)
-        if node.children[first_char] then
+        if node[idx.children][first_char] then
           -- found literal child
-          child = node.children[first_char]
+          child = node[idx.children][first_char]
         else
           parser:update(path)
           token, token_type = parser:next() -- store the next token of path
-          if node.children[token_type] then
+          if node[idx.children][token_type] then
             -- found either variable or catchall child
-            child = node.children[token_type]
+            child = node[idx.children][token_type]
           end
         end
       end
@@ -146,14 +138,13 @@ function TrieNode:add(path, value, fn, parser)
         node = child
       else
         child = TrieNode.new()
-        node.n = node.n + 1
         insert(child, path, value, fn, parser)
-        node.children = node.children or {}
-        if child.type == TYPES.literal then
+        node[idx.children] = node[idx.children] or {}
+        if child[idx.type] == TYPES.literal then
           local first_char = str_sub(path, 1, 1)
-          node.children[first_char] = child
+          node[idx.children][first_char] = child
         else
-          node.children[token_type] = child
+          node[idx.children][token_type] = child
         end
         return
       end

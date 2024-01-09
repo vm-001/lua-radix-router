@@ -17,6 +17,13 @@ local TYPE_CATCHALL = constants.node_types.catchall
 local _M = {}
 local mt = { __index = _M }
 
+--[[ A copy of node indexs
+local i_type = 1
+local i_path = 2
+local i_pathn = 3
+local i_children = 4
+local i_value = 5
+]]
 
 function _M.new(options)
   local self = {
@@ -71,13 +78,13 @@ function _M:find(node, path, path_n)
   -- luacheck: ignore
   while true do
     ::continue::
-    if node.type == TYPE_VARIABLE then
+    if node[1] == TYPE_VARIABLE then
       local not_found = true
       local i = 0
       for n = 1, path_n do
         first_char = str_byte(path, n)
         if first_char == BYTE_SLASH or
-          (node.children and node.children[str_char(first_char)]) then
+          (node[4] and node[4][str_char(first_char)]) then
           break
         end
         i = n
@@ -85,35 +92,35 @@ function _M:find(node, path, path_n)
       if i < path_n then
         path = str_sub(path, i + 1)
         path_n = path_n - i
-        if trailing_slash_match and path == "/" and node.value then
+        if trailing_slash_match and path == "/" and node[5] then
           -- matched when path has a extra slash
           matched_n = matched_n + 1
-          self.values[matched_n] = node.value
+          self.values[matched_n] = node[5]
         end
-        if node.n > 0 then
+        if node[4] then
           first_char = str_sub(path, 1, 1)
-          child = node.children[first_char]
+          child = node[4][first_char]
           if child then
             -- found static node that matches the path
             node = child
             not_found = false
           end
         end
-      elseif node.value then
+      elseif node[5] then
         -- the path is variable
         matched_n = matched_n + 1
-        self.values[matched_n] = node.value
+        self.values[matched_n] = node[5]
       end
 
       -- case1: the node doesn't contians child to match to the path
       -- case2: the path is variable value, but current node doesn't have value
       if not_found then
-        if trailing_slash_match and node.children then
+        if trailing_slash_match and node[4] then
           -- look up the children to see if "/" child with value exists
-          child = node.children["/"]
-          if child and child.value then
+          child = node[4]["/"]
+          if child and child[5] then
             matched_n = matched_n + 1
-            self.values[matched_n] = child.value
+            self.values[matched_n] = child[5]
           end
         end
 
@@ -123,22 +130,22 @@ function _M:find(node, path, path_n)
 
 
     -- the node must be a literal node
-    node_path = node.path
-    node_path_n = node.path_n
+    node_path = node[2]
+    node_path_n = node[3]
 
     if path_n > node_path_n then
       if starts_with(path, node_path, path_n, node_path_n) then
         path = str_sub(path, node_path_n + 1)
         path_n = path_n - node_path_n
 
-        child = node.children and node.children[TYPE_CATCHALL]
+        child = node[4] and node[4][TYPE_CATCHALL]
         if child then
           matched_n = matched_n + 1
-          self.values[matched_n] = child.value
+          self.values[matched_n] = child[5]
         end
 
         has_variable = false
-        child = node.children and node.children[TYPE_VARIABLE]
+        child = node[4] and node[4][TYPE_VARIABLE]
         if child then
           -- node has a variable child, but we don't know whether
           -- the path can finally match the path.
@@ -148,7 +155,7 @@ function _M:find(node, path, path_n)
         end
 
         first_char = str_sub(path, 1, 1)
-        child = node.children and node.children[first_char]
+        child = node[4] and node[4][first_char]
         if child then
           -- found static node that matches the path
           node = child
@@ -160,29 +167,29 @@ function _M:find(node, path, path_n)
           goto continue
         end
 
-        if trailing_slash_match and path == "/" and node.value then
+        if trailing_slash_match and path == "/" and node[5] then
           matched_n = matched_n + 1
-          self.values[matched_n] = node.value
+          self.values[matched_n] = node[5]
         end
       end
     elseif path == node_path then
       -- considers matched if this node has catchall child
-      child = node.children and node.children[TYPE_CATCHALL]
+      child = node[4] and node[4][TYPE_CATCHALL]
       if child then
         matched_n = matched_n + 1
-        self.values[matched_n] = child.value
+        self.values[matched_n] = child[5]
       end
 
-      if node.value then
+      if node[5] then
         matched_n = matched_n + 1
-        self.values[matched_n] = node.value
+        self.values[matched_n] = node[5]
       end
     else
       -- #path < #node_path
       if trailing_slash_match and path_n == node_path_n - 1
-        and str_byte(node_path, node_path_n) == BYTE_SLASH and node.value then
+        and str_byte(node_path, node_path_n) == BYTE_SLASH and node[5] then
         matched_n = matched_n + 1
-        self.values[matched_n] = node.value
+        self.values[matched_n] = node[5]
       end
     end
 
