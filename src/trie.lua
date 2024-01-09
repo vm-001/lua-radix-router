@@ -14,26 +14,20 @@ local TYPES = constants.node_types
 local idx = constants.node_indexs
 
 local TrieNode = {}
-local mt = { __index = TrieNode }
+
 
 function TrieNode.new(node_type, path, children, value)
-  local self = {
-    node_type,
-    path,
-    path and #path or 0,
-    children,
-    value,
-  }
-  return setmetatable(self, mt)
+  local pathn = path and #path or 0
+  return { node_type, path, pathn, children, value }
 end
 
 
-function TrieNode:set(value, fn)
+function TrieNode.set(self, value, fn)
   if type(fn) == "function" then
     fn(self)
     return
   end
-  self.value = value
+  self[idx.value] = value
 end
 
 
@@ -66,7 +60,7 @@ local function insert(node, path, value, fn, parser)
     end
   end
 
-  node:set(value, fn)
+  TrieNode.set(node, value, fn)
 end
 
 
@@ -87,7 +81,7 @@ local function split(node, path, prefix_n)
 end
 
 
-function TrieNode:add(path, value, fn, parser)
+function TrieNode.add(self, path, value, fn, parser)
   if not self[idx.path] and not self[idx.type] then
     -- insert to current empty node
     insert(self, path, value, fn, parser)
@@ -153,7 +147,7 @@ function TrieNode:add(path, value, fn, parser)
     end
   end
 
-  node:set(value, fn)
+  TrieNode.set(node, value, fn)
 end
 
 
