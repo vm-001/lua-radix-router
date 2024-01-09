@@ -7,6 +7,7 @@ local Route = require "radix-router.route"
 local Parser = require "radix-router.parser"
 local Iterator = require "radix-router.iterator"
 local Options = require "radix-router.options"
+local Matcher = require "radix-router.matcher"
 local utils = require "radix-router.utils"
 local constants = require "radix-router.constatns"
 
@@ -64,11 +65,18 @@ end
 -- @tab otps options table
 function Router.new(routes, opts)
   if routes ~= nil and type(routes) ~= "table" then
-    return nil, "invalid argument: routes"
+    return nil, "invalid args routes: routes must be table or nil"
   end
 
-  local options = Options.options(opts)
-  routes = routes or EMPTY
+  local options, err = Options.options(opts)
+  if not options then
+    return nil, "invalid args opts: " .. err
+  end
+
+  local matcher, err = Matcher.new(options.matcher_names, options.matchers)
+  if err then
+    return nil, err
+  end
 
   local self = {
     options = options,
@@ -76,13 +84,18 @@ function Router.new(routes, opts)
     static = {},
     trie = Trie.new(),
     iterator = Iterator.new(options),
+    matcher = matcher,
   }
 
   local route_opts = {
     parser = self.parser
   }
 
-  for i, route in ipairs(routes) do
+  for i, route in ipairs(routes or EMPTY) do
+    local ok, err = self.matcher:process(route)
+    if not ok then
+      return nil, "unable to process route(index " .. i .. "): " .. err
+    end
     local route_t, err = Route.new(route, route_opts)
     if err then
       return nil, "invalid route(index " .. i .. "): " .. err
@@ -97,10 +110,10 @@ function Router.new(routes, opts)
 end
 
 
-local function find_route(routes, ctx, matched)
+local function find_route(matcher, routes, ctx, matched)
   if routes[0] == 1 then
     local route = routes[1][2]
-    if route:is_match(ctx, matched) then
+    if matcher:match(route, ctx, matched) then
       return route, routes[1][1]
     end
     return nil, nil
@@ -108,7 +121,7 @@ local function find_route(routes, ctx, matched)
 
   for n = 1, routes[0] do
     local route = routes[n][2]
-    if route:is_match(ctx, matched) then
+    if matcher:match(route, ctx, matched) then
       return route, routes[n][1]
     end
   end
@@ -127,10 +140,11 @@ function Router:match(path, ctx, params, matched)
 
   local trailing_slash_match = self.options.trailing_slash_match
   local matched_route, matched_path
+  local matcher = self.matcher
 
   local routes = self.static[path]
   if routes then
-    matched_route, matched_path = find_route(routes, ctx, matched)
+    matched_route, matched_path = find_route(matcher, routes, ctx, matched)
     if matched_route then
       if matched then
         matched.path = matched_path
@@ -146,7 +160,7 @@ function Router:match(path, ctx, params, matched)
       routes = self.static[path .. "/"]
     end
     if routes then
-      matched_route, matched_path = find_route(routes, ctx, matched)
+      matched_route, matched_path = find_route(matcher, routes, ctx, matched)
       if matched_route then
         if matched then
           matched.path = matched_path
@@ -164,7 +178,7 @@ function Router:match(path, ctx, params, matched)
     local values, count = self.iterator:find(node, state_path, state_path_n)
     if values then
       for n = count, 1, -1 do
-        matched_route, matched_path = find_route(values[n], ctx, matched)
+        matched_route, matched_path = find_route(matcher, values[n], ctx, matched)
         if matched_route then
           if matched then
             matched.path = matched_path

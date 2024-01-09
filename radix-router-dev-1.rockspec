@@ -37,5 +37,8 @@ build = {
     ["radix-router.iterator"] = "src/iterator.lua",
     ["radix-router.parser"] = "src/parser/parser.lua",
     ["radix-router.parser.style.default"] = "src/parser/style/default.lua",
+    ["radix-router.matcher"] = "src/matcher/matcher.lua",
+    ["radix-router.matcher.host"] = "src/matcher/host.lua",
+    ["radix-router.matcher.method"] = "src/matcher/method.lua",
   },
 }
