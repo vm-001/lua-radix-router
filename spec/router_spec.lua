@@ -28,11 +28,11 @@ describe("Router", function()
 
       router, err = Router.new(false)
       assert.is_nil(router)
-      assert.equal("invalid argument: routes", err)
+      assert.equal("invalid args routes: routes must be table or nil", err)
 
       router, err = Router.new("")
       assert.is_nil(router)
-      assert.equal("invalid argument: routes", err)
+      assert.equal("invalid args routes: routes must be table or nil", err)
 
       router, err = Router.new({
         {
@@ -55,15 +55,40 @@ describe("Router", function()
         },
       })
       assert.is_nil(router)
-      assert.equal("invalid route(index 1): invalid methond", err)
+      assert.equal("unable to process route(index 1): invalid methond", err)
     end)
     it("new() with opts argument", function()
       local router, err = Router.new({}, {
-        trailing_slash_match = true
+        trailing_slash_match = true,
+        matcher_names = { "host" },
+        matchers = {
+          {
+            match = function(route, ctx, matched) return true end
+          }
+        }
       })
       assert.is_nil(err)
       assert.not_nil(router)
       assert.equal(true, router.options.trailing_slash_match)
+    end)
+    it("new() with invalid opts argument", function()
+      local router, err = Router.new({}, {
+        matchers = { { match = "" } }
+      })
+      assert.is_nil(router)
+      assert.equal("invalid args opts: invalid type matcher.match", err)
+
+      local router, err = Router.new({}, { trailing_slash_match = "" })
+      assert.is_nil(router)
+      assert.equal("invalid args opts: invalid type trailing_slash_match", err)
+
+      local router, err = Router.new({}, { matcher_names = "" })
+      assert.is_nil(router)
+      assert.equal("invalid args opts: invalid type matcher_names", err)
+
+      local router, err = Router.new({}, { matcher_names = { "inexistent" } })
+      assert.is_nil(router)
+      assert.equal("invalid matcher name: inexistent", err)
     end)
   end)
   describe("match", function()
@@ -633,6 +658,83 @@ describe("Router", function()
 
       assert.equal("30", router:match("/bb/var/foo/", {  method = "GET" }))
       assert.equal("40", router:match("/bb/var/bar/", {  method = "GET" }))
+    end)
+  end)
+  describe("custom matchers", function()
+    it("disable all of the built-in matcher", function()
+      local opts = {
+        matcher_names = {}
+      }
+      local router = Router.new({
+        {
+          paths = { "/" },
+          methods = { "GET" },
+          hosts = { "www.a.com" },
+          handler = "1",
+        },
+      }, opts)
+      assert.equal("1", router:match("/"))
+    end)
+    it("disable some of the built-in matcher", function()
+      local opts = {
+        matcher_names = { "method" }
+      }
+      local router = Router.new({
+        {
+          paths = { "/" },
+          methods = { "GET" },
+          hosts = { "www.a.com" },
+          handler = "1",
+        },
+      }, opts)
+      assert.equal("1", router:match("/", { method = "GET", host = "no-matter-what" }))
+    end)
+    it("custom matcher", function()
+      local ip_matcher = {
+        process = function(route)
+          if route.ips then
+            local ips = {}
+            for _, ip in ipairs(route.ips) do
+              ips[ip] = true
+            end
+            route.ips = ips
+          end
+        end,
+        match = function(route, ctx, matched)
+          if route.ips then
+            local ip = ctx.ip
+            if not route.ips[ip] then
+              return false
+            end
+            if matched then
+              matched["ip"] = ip
+            end
+          end
+          return true
+        end
+      }
+      local opts = {
+        matchers = { ip_matcher }
+      }
+
+      local router = Router.new({
+        {
+          paths = { "/" },
+          ips = { "127.0.0.1", "127.0.0.2" },
+          handler = "1",
+        },
+        {
+          paths = { "/" },
+          ips = { "192.168.1.1", "192.168.1.2" },
+          handler = "2",
+        }
+      }, opts)
+      assert.equal("1", router:match("/", { ip = "127.0.0.2" }))
+      assert.equal("2", router:match("/", { ip = "192.168.1.2" }))
+      -- with matched
+      local matched = {}
+      assert.equal("2", router:match("/", { ip = "192.168.1.2" }, nil, matched))
+      assert.equal("192.168.1.2", matched.ip)
     end)
   end)
 end)
