@@ -16,14 +16,10 @@ local idx = constants.node_indexs
 local TrieNode = {}
 local mt = { __index = TrieNode }
 
+
 function TrieNode.new(node_type, path, children, value)
-  local self = {
-    node_type,
-    path,
-    path and #path or 0,
-    children,
-    value,
-  }
+  local pathn = path and #path or 0
+  local self = { node_type, path, pathn, children, value }
   return setmetatable(self, mt)
 end
 
@@ -33,7 +29,7 @@ function TrieNode:set(value, fn)
     fn(self)
     return
   end
-  self.value = value
+  self[idx.value] = value
 end
 
 
