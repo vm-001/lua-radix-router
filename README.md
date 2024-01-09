@@ -16,11 +16,11 @@ The router is designed for high performance. A compressing dynamic trie (radix t
     - `/users/{id}/profile-{year}.{format}`:  multiple variables in one path segment is allowed
 - **Prefix matching**: Syntax `{*varname}`.
     - `/api/authn/{*path}`
-
 - **Variables binding**: The router automatically injects the binding result for you during matching.
 - **Best performance**: The fastest router in Lua/LuaJIT. See [Benchmarks](#-Benchmarks).
 - **OpenAPI friendly**: OpenAPI(Swagger) fully compatible.
 - **Trailing slash match**: You can make the Router to ignore the trailing slash by setting `trailing_slash_match` to true. For example, /foo/ to match the existing /foo, /foo to match the existing /foo/.
+- **Custom matcher**: The router has two efficient matchers built in, MethodMatcher(`method`) and HostMatcher(`host`). They can be disabled via `opts.matcher_names`. You can also add your custom matchers via `opts.matchers`. For example, an IpMatcher to evaluate whether the `ctx.ip` is matched with the `ips` of a route.
 
 **Features in the roadmap**:
 
@@ -96,14 +96,16 @@ local router, err = Router.new(routes, opts)
 
 - **routes** (`table|nil`): the array-like Route table.
 
-- **opts** (table|nil): the object-like Options table.
+- **opts** (`table|nil`): the object-like Options table.
 
     The available options are as follow
 
-    | NAME                 | DESCRIPTION                  | DEFAULT |
-    | -------------------- | ---------------------------- | ------- |
-    | trailing_slash_match | Enables trailing slash match | false   |
-
+    | NAME                 | TYPE    | DEFAULT              | DESCRIPTION                                         |
+    | -------------------- | ------- | -------------------- | --------------------------------------------------- |
+    | trailing_slash_match | boolean | false                | whether to enable the trailing slash match behavior |
+    | matcher_names        | table   | { "method", "host" } | enabled built-in macher list                        |
+    | matchers             | table   | {  }                 | custom matcher list                                 |
+    
     
 
 Route defines the matching conditions for its handler.
