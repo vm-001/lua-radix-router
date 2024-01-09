@@ -5,9 +5,9 @@
 return {
   -- The type of TrieNode
   node_types = {
-    literal = 1,
-    variable = 2,
-    catchall = 3,
+    literal = 0,
+    variable = 1,
+    catchall = 2,
   },
   node_indexs = {
     type = 1,
@@ -18,8 +18,8 @@ return {
   },
   -- The type of token
   token_types = {
-    literal = 1,
-    variable = 2,
-    catchall = 3,
+    literal = 0,
+    variable = 1,
+    catchall = 2,
   },
 }
