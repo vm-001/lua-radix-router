@@ -215,6 +215,18 @@ router.trie = /                   nil
                  └─{catchall}     { "/src/{*filename}",      *<table 3> }
 ```
 
+## Route precedence
+
+path precedence from highest to lowest is:
+
+- literal path: `/html/index.html`
+- patterned path: path with lesser patterns has higher precedence. 
+  - `/a/{var}/bb` is higher than `/a/{var}/b{value}`
+
+
+- first registered first match
+- 
+
 
 ## 🚀 Benchmarks
 
