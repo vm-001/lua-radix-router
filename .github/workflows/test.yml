@@ -38,7 +38,7 @@ jobs:
 
       - name: build
         run: |
-          make build
+          make install
 
       - name: run tests
         run: |
