@@ -1,26 +1,31 @@
-# Lua-Radix-Router [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml) [![Coverage Status](https://coveralls.io/repos/github/vm-001/lua-radix-router/badge.svg)](https://coveralls.io/github/vm-001/lua-radix-router)
+# Lua-Radix-Router [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml) [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/sample.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/sample.yml) [![Coverage Status](https://coveralls.io/repos/github/vm-001/lua-radix-router/badge.svg)](https://coveralls.io/github/vm-001/lua-radix-router) ![Lua Versions](https://img.shields.io/badge/Lua-%205.2%20|%205.3%20|%205.4-blue.svg)
 
 English | [中文](README.zh.md)
 
----
-
-Lua-Radix-Router is a lightweight high-performance router, written in pure Lua. The router is easy to use, with only two methods, `Router.new()` and `Router:match()`. It can be integrated into different runtimes such as Lua application, LuaJIT, or OpenResty.
 
 
+Lua-Radix-Router is a lightweight high-performance router library written in pure Lua. It's easy to use with only two exported functions, `Router.new()` and `router:match()`. 
 
-The router is designed for high performance. A compressing dynamic trie (radix tree) is used for efficient matching. Even with millions of routes containing complex paths, matching can still be done in 1 nanosecond. 
+The router is optimized for high performance. It combines HashTable(O(1)) and Compressed Trie(or Radix Tree, O(m) where m is the length of path being searched) for efficient matching. Some of the utility functions have the LuaJIT version for better performance, and will automatically switch when running in LuaJIT. It also scales well even with long paths and a large number of routes.
+
+The router can be run in different runtimes such as Lua, LuaJIT, or OpenResty.
 
 ## 🔨 Features
 
-- **Variables in path**: Syntax  `{varname}`. 
-    - `/users/{id}/profile-{year}.{format}`:  multiple variables in one path segment is allowed
-- **Prefix matching**: Syntax `{*varname}`.
-    - `/api/authn/{*path}`
-- **Variables binding**: The router automatically injects the binding result for you during matching.
-- **Best performance**: The fastest router in Lua/LuaJIT. See [Benchmarks](#-Benchmarks).
-- **OpenAPI friendly**: OpenAPI(Swagger) fully compatible.
-- **Trailing slash match**: You can make the Router to ignore the trailing slash by setting `trailing_slash_match` to true. For example, /foo/ to match the existing /foo, /foo to match the existing /foo/.
-- **Custom matcher**: The router has two efficient matchers built in, MethodMatcher(`method`) and HostMatcher(`host`). They can be disabled via `opts.matcher_names`. You can also add your custom matchers via `opts.matchers`. For example, an IpMatcher to evaluate whether the `ctx.ip` is matched with the `ips` of a route.
+**Patterned path:** You can define named or unnamed patterns in path with pattern syntax "{}" and "{*}"
+
+-   named variables: `/users/{id}/profile-{year}.{format}`, matches with /users/1/profile-2024.html.
+-   named prefix: `/api/authn/{*path}`, matches with /api/authn/foo and /api/authn/foo/bar.
+
+**Variable binding:** Stop manually parsing the URL, let the router injects the binding variables for you.
+
+**Best performance:** The fastest router in Lua/LuaJIT. See [Benchmarks](#-Benchmarks).
+
+**OpenAPI friendly:** OpenAPI(Swagger) is fully compatible.
+
+**Trailing slash match:** You can make the Router to ignore the trailing slash by setting `trailing_slash_match` to true. For example, /foo/ to match the existing /foo, /foo to match the existing /foo/.
+
+**Custom matcher:** The router has two efficient matchers built in, MethodMatcher(`method`) and HostMatcher(`host`). They can be disabled via `opts.matcher_names`. You can also add your custom matchers via `opts.matchers`. For example, an IpMatcher to evaluate whether the `ctx.ip` is matched with the `ips` of a route.
 
 **Features in the roadmap**:
 
@@ -39,7 +44,7 @@ luarocks install radix-router
 Or from source
 
 ```
-make build
+make install
 ```
 
 Get started by an example:
@@ -81,7 +86,7 @@ assert(params.year == "2023")
 assert(params.format == "pdf")
 ```
 
-For more usage samples, please refer to the `/samples` directory.
+For more usage samples, please refer to the [/samples](/samples) directory. For more use cases, please check out https://github.com/vm-001/lua-radix-router-use-cases.
 
 ## 📄 Methods
 
@@ -101,11 +106,11 @@ local router, err = Router.new(routes, opts)
 
     The available options are as follow
 
-    | NAME                 | TYPE    | DEFAULT              | DESCRIPTION                                         |
-    | -------------------- | ------- | -------------------- | --------------------------------------------------- |
-    | trailing_slash_match | boolean | false                | whether to enable the trailing slash match behavior |
-    | matcher_names        | table   | { "method", "host" } | enabled built-in macher list                        |
-    | matchers             | table   | {  }                 | custom matcher list                                 |
+    | NAME                 | TYPE    | DEFAULT            | DESCRIPTION                                         |
+    | -------------------- | ------- | ------------------ | --------------------------------------------------- |
+    | trailing_slash_match | boolean | false              | whether to enable the trailing slash match behavior |
+    | matcher_names        | table   | {"method", "host"} | enabled built-in macher list                        |
+    | matchers             | table   | { }                | custom matcher list                                 |
     
     
 
@@ -115,10 +120,9 @@ Route defines the matching conditions for its handler.
 |-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `paths`</br> *required\**    | A list of paths that match the Route.</br>                                                                                                                                               |
 | `methods`</br> *optional*     | A list of HTTP methods that match the Route. </br>                                                                                                                                       |
-| `hosts`</br> *optional*            | A list of hostnames that match the Route. Note that the value is case-sensitive. Wildcard hostnames are supported. For example, `*.foo.com` can match with `a.foo.com` or `a.b.foo.com`. | 
+| `hosts`</br> *optional*            | A list of hostnames that match the Route. Note that the value is case-sensitive. Wildcard hostnames are supported. For example, `*.foo.com` can match with `a.foo.com` or `a.b.foo.com`. |
 | `handler`</br> *required\**        | The value of handler will be returned by `router:match()` when the route is matched.                                                                                                     |
 | `priority`</br> *optional*         | The priority of the route in case of radix tree node conflict.                                                                                                                           |
-| `expression`</br> *optional* (TDB) | The `expression` defines a customized matching condition by using expression language.                                                                                                   |
 
 
 
@@ -219,7 +223,7 @@ router.trie = /                   nil
 To run the benchmark
 
 ```$ make bench
-$ make build
+$ make install
 $ make bench
 ```
 
@@ -327,3 +331,7 @@ Memory  :	2.72 MB
 
 
 ## License
+
+BSD 2-Clause License
+
+Copyright (c) 2024, Yusheng Li

@@ -1,4 +1,6 @@
-build:
+.PHONY: install test test-coverage bench lint
+
+install:
 	luarocks make
 
 test:
@@ -6,6 +8,9 @@ test:
 
 test-coverage:
 	busted --coverage spec/
+
+lint:
+	luacheck .
 
 CMD=luajit
 bench:

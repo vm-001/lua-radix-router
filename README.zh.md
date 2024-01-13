@@ -44,7 +44,7 @@ luarocks install radix-router
 或者从源码安装
 
 ```
-make build
+make install
 ```
 
 通过示例开始：
@@ -136,7 +136,7 @@ local handler = router:match(path, ctx, params)
 #### 用法
 
 ```
-$ make build
+$ make install
 $ make bench
 ```
 
