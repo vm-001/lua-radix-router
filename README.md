@@ -86,7 +86,7 @@ assert(params.year == "2023")
 assert(params.format == "pdf")
 ```
 
-For more usage samples, please refer to the [/samples](/samples) directory. For more use cases, please check out https://github.com/vm-001/lua-radix-router-use-cases.
+For more usage samples, please refer to the [/samples](/samples) directory. For more use cases, please check out [lua-radix-router-use-cases](https://github.com/vm-001/lua-radix-router-use-cases).
 
 ## 📄 Methods
 
