@@ -86,7 +86,7 @@ assert(params.year == "2023")
 assert(params.format == "pdf")
 ```
 
-For more usage samples, please refer to the [/samples](/samples) directory. For more use cases, please check out https://github.com/vm-001/lua-radix-router-use-cases.
+For more usage samples, please refer to the [/samples](/samples) directory. For more use cases, please check out [lua-radix-router-use-cases](https://github.com/vm-001/lua-radix-router-use-cases).
 
 ## 📄 Methods
 
@@ -214,6 +214,18 @@ router.trie = /                   nil
                └─rc/              nil
                  └─{catchall}     { "/src/{*filename}",      *<table 3> }
 ```
+
+## Route precedence
+
+path precedence from highest to lowest is:
+
+- literal path: `/html/index.html`
+- patterned path: path with lesser patterns has higher precedence. 
+  - `/a/{var}/bb` is higher than `/a/{var}/b{value}`
+
+
+- first registered first match
+- 
 
 
 ## 🚀 Benchmarks
