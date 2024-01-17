@@ -6,7 +6,7 @@
 -- - `{name}`: variable parameter
 -- - `{*name}`: catch-all parameter
 
-local constants = require "radix-router.constatns"
+local constants = require "radix-router.constants"
 
 local byte = string.byte
 local sub = string.sub

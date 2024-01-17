@@ -9,7 +9,7 @@ local Iterator = require "radix-router.iterator"
 local Options = require "radix-router.options"
 local Matcher = require "radix-router.matcher"
 local utils = require "radix-router.utils"
-local constants = require "radix-router.constatns"
+local constants = require "radix-router.constants"
 
 local ipairs = ipairs
 local str_byte = string.byte
