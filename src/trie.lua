@@ -3,7 +3,7 @@
 --
 
 local utils = require "radix-router.utils"
-local constants = require "radix-router.constatns"
+local constants = require "radix-router.constants"
 
 local str_sub = string.sub
 local lcp = utils.lcp
