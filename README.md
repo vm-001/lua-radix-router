@@ -25,13 +25,16 @@ The router can be run in different runtimes such as Lua, LuaJIT, or OpenResty.
 
 **Trailing slash match:** You can make the Router to ignore the trailing slash by setting `trailing_slash_match` to true. For example, /foo/ to match the existing /foo, /foo to match the existing /foo/.
 
-**Custom matcher:** The router has two efficient matchers built in, MethodMatcher(`method`) and HostMatcher(`host`). They can be disabled via `opts.matcher_names`. You can also add your custom matchers via `opts.matchers`. For example, an IpMatcher to evaluate whether the `ctx.ip` is matched with the `ips` of a route.
+**Custom Matcher:** The router has two efficient matchers built in, MethodMatcher(`method`) and HostMatcher(`host`). They can be disabled via `opts.matcher_names`. You can also add your custom matchers via `opts.matchers`. For example, an IpMatcher to evaluate whether the `ctx.ip` is matched with the `ips` of a route.
+
+**Regex pattern:** You can define regex pattern in variables. a variable without regex pattern is treated as `[^/]+`.
+
+- `/users/{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}`
+- `/users/{id:\\d+}/profile-{year:\\d{4}}.{format:(html|pdf)}`
 
 **Features in the roadmap**:
 
 - Expression condition: defines custom matching conditions by using expression language.
-- Regex in variable
-
 
 ## 📖 Getting started
 
@@ -106,11 +109,11 @@ local router, err = Router.new(routes, opts)
 
     The available options are as follow
 
-    | NAME                 | TYPE    | DEFAULT            | DESCRIPTION                                         |
-    | -------------------- | ------- | ------------------ | --------------------------------------------------- |
-    | trailing_slash_match | boolean | false              | whether to enable the trailing slash match behavior |
-    | matcher_names        | table   | {"method", "host"} | enabled built-in macher list                        |
-    | matchers             | table   | { }                | custom matcher list                                 |
+    | NAME                 | TYPE    | DEFAULT           | DESCRIPTION                                         |
+    | -------------------- | ------- | ----------------- | --------------------------------------------------- |
+    | trailing_slash_match | boolean | false             | whether to enable the trailing slash match behavior |
+    | matcher_names        | table   | {"method","host"} | enabled built-in macher list                        |
+    | matchers             | table   | { }               | custom matcher list                                 |
 
 
 
@@ -140,6 +143,28 @@ local handler = router:match(path, ctx, params, matched)
 - **ctx**(`table|nil`): the optional condition ctx to use for matching.
 - **params**(`table|nil`): the optional table to use for storing the parameters binding result.
 - **matched**(`table|nil`): the optional table to use for storing the matched conditions.
+
+## 📝 Examples
+
+#### Regex pattern
+
+Using regex to define the pattern of a variable. Note that at most one URL segment is evaluated when matching a variable's pattern, which means it's not allowed to define a pattern crossing multiple URL segments, for example, `{var:[/0-9a-z]+}`.
+
+```lua
+local Router = require "radix-router"
+local router = Router.new({
+  {
+    paths = { "/users/{id:\\d+}/profile-{year:\\d{4}}.{format:(html|pdf)}" },
+    handler = "1"
+  },
+  {
+    paths = { "/users/{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}" },
+    handler = "2"
+  },
+})
+assert("1" == router:match("/users/100/profile-2024.pdf"))
+assert("2", router:match("/users/00000000-0000-0000-0000-000000000000"))
+```
 
 ## 🧠 Data Structure and Implementation
 
@@ -214,7 +239,6 @@ router.trie = /                   nil
                └─rc/              nil
                  └─{catchall}     { "/src/{*filename}",      *<table 3> }
 ```
-
 
 ## 🚀 Benchmarks
 

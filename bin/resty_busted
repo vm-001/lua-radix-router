@@ -1,0 +1,7 @@
+#!/usr/bin/env resty
+
+if ngx ~= nil then
+  ngx.exit = function()end
+end
+
+require 'busted.runner'({ standalone = false })

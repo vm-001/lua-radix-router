@@ -11,7 +11,7 @@ on:
       - '**/*.md'
 
 jobs:
-  test:
+  lua:
     runs-on: ubuntu-latest
 
     strategy:
@@ -48,6 +48,7 @@ jobs:
         run: |
           lua examples/example.lua
           lua examples/custom-matcher.lua
+          lua examples/regular-expression.lua
 
       - name: report test coverage
         if: success()
@@ -59,3 +60,57 @@ jobs:
       - name: benchmark
         run: |
           make bench CMD=lua
+
+  openresty:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        openrestyVersion: [ "1.19.9.1", "1.21.4.3", "1.25.3.1" ]
+
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v3
+
+      - name: install Lua/LuaJIT
+        uses: leafo/gh-actions-lua@v8
+        with:
+          luaVersion: "luajit-openresty"
+
+      - uses: leafo/gh-actions-openresty@v1
+        with:
+          openrestyVersion: ${{ matrix.openrestyVersion }}
+
+      - name: install LuaRocks
+        uses: leafo/gh-actions-luarocks@v4
+
+      - name: install dependencies
+        run: |
+          luarocks install busted
+          luarocks install luacov-coveralls
+
+      - name: build
+        run: |
+          make install
+
+      - name: run tests
+        run: |
+          bin/resty_busted --coverage spec/
+
+      - name: samples
+        run: |
+          resty examples/example.lua
+          resty examples/custom-matcher.lua
+          resty examples/regular-expression.lua
+
+      - name: report test coverage
+        if: success()
+        continue-on-error: true
+        run: luacov-coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ github.token }}
+
+      - name: benchmark
+        run: |
+          make bench CMD=resty

@@ -1,6 +1,6 @@
 --- Route a route defines the matching conditions of its handler.
 --
---
+-- @module radix-router.route
 
 local ipairs = ipairs
 local str_byte = string.byte
@@ -10,7 +10,7 @@ local Route = {}
 local mt = { __index = Route }
 
 
-function Route.new(route, _)
+function Route.new(route)
   if route.handler == nil then
     return nil, "handler must not be nil"
   end
