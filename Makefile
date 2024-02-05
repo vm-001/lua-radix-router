@@ -21,3 +21,7 @@ bench:
 	RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=1000000 $(CMD) benchmark/complex-variable.lua
 	RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 $(CMD) benchmark/simple-variable-binding.lua
 	RADIX_ROUTER_TIMES=1000000 $(CMD) benchmark/github-routes.lua
+
+ldoc:
+	@rm -rf docs/*
+	@ldoc .

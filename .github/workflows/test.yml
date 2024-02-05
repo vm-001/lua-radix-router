@@ -46,7 +46,8 @@ jobs:
 
       - name: samples
         run: |
-          lua samples/1-sample.lua
+          lua examples/example.lua
+          lua examples/custom-matcher.lua
 
       - name: report test coverage
         if: success()
