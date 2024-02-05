@@ -1,6 +1,6 @@
---- Router the router engine
+--- Radix-Router is a lightweight high-performance and radix tree based router matching library.
 --
---
+-- @module radix-router
 
 local Trie = require "radix-router.trie"
 local Route = require "radix-router.route"
@@ -60,9 +60,19 @@ local function add_route(self, path, route)
 end
 
 
---- new a Router instance
--- @tab routes routes table
--- @tab otps options table
+--- create a new router.
+-- @tab[opt] routes a list-like table of routes
+-- @tab[opt] opts options table
+-- @return a new router, or nil
+-- @return cannot create router error
+-- @usage
+-- local router, err = router.new({
+--   {
+--     paths = { "/hello-{word}" },
+--     methods = { "GET" },
+--     handler = "hello handler",
+--   },
+-- })
 function Router.new(routes, opts)
   if routes ~= nil and type(routes) ~= "table" then
     return nil, "invalid args routes: routes must be table or nil"
@@ -130,11 +140,16 @@ local function find_route(matcher, routes, ctx, matched)
 end
 
 
---- return the handler of a Route that matches the path and ctx
--- @string path the path
--- @tab ctx the condition ctx
--- @tab params table to store the parameters
--- @tab matched table to store the matched condition
+--- find a handler of route that matches the path and ctx.
+-- @string path the request path
+-- @tab[opt] ctx the request context
+-- @tab[opt] params a table to store the parsed parameters
+-- @tab[opt] matched a table to store the matched conditions, such as path, method and host
+-- @return the handler of a route matches the path and ctx, or nil if not found
+-- @usage
+-- local params = {}
+-- local matched = {}
+-- local handler = router:match("/hello-world", { method = "GET" }, params, matched)
 function Router:match(path, ctx, params, matched)
   ctx = ctx or EMPTY
 

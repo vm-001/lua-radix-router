@@ -1,10 +1,10 @@
-# Lua-Radix-Router [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml) [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/sample.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/sample.yml) [![Coverage Status](https://coveralls.io/repos/github/vm-001/lua-radix-router/badge.svg)](https://coveralls.io/github/vm-001/lua-radix-router) ![Lua Versions](https://img.shields.io/badge/Lua-%205.2%20|%205.3%20|%205.4-blue.svg)
+# Lua-Radix-Router [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml) [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/examples.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/examples.yml) [![Coverage Status](https://coveralls.io/repos/github/vm-001/lua-radix-router/badge.svg)](https://coveralls.io/github/vm-001/lua-radix-router) ![Lua Versions](https://img.shields.io/badge/Lua-%205.2%20|%205.3%20|%205.4-blue.svg)
 
 English | [中文](README.zh.md)
 
 
 
-Lua-Radix-Router is a lightweight high-performance router library written in pure Lua. It's easy to use with only two exported functions, `Router.new()` and `router:match()`. 
+Lua-Radix-Router is a lightweight high-performance router library written in pure Lua. It's easy to use with only two exported functions, `Router.new()` and `router:match()`.
 
 The router is optimized for high performance. It combines HashTable(O(1)) and Compressed Trie(or Radix Tree, O(m) where m is the length of path being searched) for efficient matching. Some of the utility functions have the LuaJIT version for better performance, and will automatically switch when running in LuaJIT. It also scales well even with long paths and a large number of routes.
 
@@ -86,7 +86,7 @@ assert(params.year == "2023")
 assert(params.format == "pdf")
 ```
 
-For more usage samples, please refer to the [/samples](/samples) directory. For more use cases, please check out https://github.com/vm-001/lua-radix-router-use-cases.
+For more usage samples, please refer to the [/examples](/examples) directory. For more use cases, please check out [lua-radix-router-use-cases](https://github.com/vm-001/lua-radix-router-use-cases).
 
 ## 📄 Methods
 
@@ -111,8 +111,8 @@ local router, err = Router.new(routes, opts)
     | trailing_slash_match | boolean | false              | whether to enable the trailing slash match behavior |
     | matcher_names        | table   | {"method", "host"} | enabled built-in macher list                        |
     | matchers             | table   | { }                | custom matcher list                                 |
-    
-    
+
+
 
 Route defines the matching conditions for its handler.
 
@@ -203,7 +203,7 @@ router.static = {
   [/api/login] = { *<table 1> }
 }
 
-              TrieNode.path       TrieNode.value                   
+              TrieNode.path       TrieNode.value
 router.trie = /                   nil
               ├─people/           nil
               │ └─{wildcard}      nil
@@ -229,7 +229,7 @@ $ make bench
 
 #### Environments
 
-- Apple MacBook Pro(M1 Pro), 32GB 
+- Apple MacBook Pro(M1 Pro), 32GB
 - LuaJIT 2.1.1700008891
 
 #### Results
