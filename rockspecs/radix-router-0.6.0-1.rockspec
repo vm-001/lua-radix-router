@@ -1,9 +1,9 @@
 package = "radix-router"
-version = "dev-1"
+version = "0.6.0-1"
 
 source = {
-  url = "git+https://github.com/vm-001/lua-radix-router.git",
-  branch = "main"
+  url = "git://github.com/vm-001/lua-radix-router",
+  tag = "v0.6.0",
 }
 
 description = {
