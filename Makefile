@@ -26,3 +26,9 @@ bench:
 ldoc:
 	@rm -rf docs/*
 	@ldoc .
+
+
+FILE=
+API_KEY=
+upload:
+	luarocks upload $(FILE) --api-key=$(API_KEY)
