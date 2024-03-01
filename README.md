@@ -25,13 +25,16 @@ The router can be run in different runtimes such as Lua, LuaJIT, or OpenResty.
 
 **Trailing slash match:** You can make the Router to ignore the trailing slash by setting `trailing_slash_match` to true. For example, /foo/ to match the existing /foo, /foo to match the existing /foo/.
 
-**Custom matcher:** The router has two efficient matchers built in, MethodMatcher(`method`) and HostMatcher(`host`). They can be disabled via `opts.matcher_names`. You can also add your custom matchers via `opts.matchers`. For example, an IpMatcher to evaluate whether the `ctx.ip` is matched with the `ips` of a route.
+**Custom Matcher:** The router has two efficient matchers built in, MethodMatcher(`method`) and HostMatcher(`host`). They can be disabled via `opts.matcher_names`. You can also add your custom matchers via `opts.matchers`. For example, an IpMatcher to evaluate whether the `ctx.ip` is matched with the `ips` of a route.
+
+**Regex pattern:** You can define regex pattern in variables. a variable without regex pattern is treated as `[^/]+`.
+
+- `/users/{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}`
+- `/users/{id:\\d+}/profile-{year:\\d{4}}.{format:(html|pdf)}`
 
 **Features in the roadmap**:
 
 - Expression condition: defines custom matching conditions by using expression language.
-- Regex in variable
-
 
 ## 📖 Getting started
 
@@ -106,11 +109,11 @@ local router, err = Router.new(routes, opts)
 
     The available options are as follow
 
-    | NAME                 | TYPE    | DEFAULT            | DESCRIPTION                                         |
-    | -------------------- | ------- | ------------------ | --------------------------------------------------- |
-    | trailing_slash_match | boolean | false              | whether to enable the trailing slash match behavior |
-    | matcher_names        | table   | {"method", "host"} | enabled built-in macher list                        |
-    | matchers             | table   | { }                | custom matcher list                                 |
+    | NAME                 | TYPE    | DEFAULT           | DESCRIPTION                                         |
+    | -------------------- | ------- | ----------------- | --------------------------------------------------- |
+    | trailing_slash_match | boolean | false             | whether to enable the trailing slash match behavior |
+    | matcher_names        | table   | {"method","host"} | enabled built-in macher list                        |
+    | matchers             | table   | { }               | custom matcher list                                 |
 
 
 
@@ -140,6 +143,28 @@ local handler = router:match(path, ctx, params, matched)
 - **ctx**(`table|nil`): the optional condition ctx to use for matching.
 - **params**(`table|nil`): the optional table to use for storing the parameters binding result.
 - **matched**(`table|nil`): the optional table to use for storing the matched conditions.
+
+## 📝 Examples
+
+#### Regex pattern
+
+Using regex to define the pattern of a variable. Note that at most one URL segment is evaluated when matching a variable's pattern, which means it's not allowed to define a pattern crossing multiple URL segments, for example, `{var:[/0-9a-z]+}`.
+
+```lua
+local Router = require "radix-router"
+local router = Router.new({
+  {
+    paths = { "/users/{id:\\d+}/profile-{year:\\d{4}}.{format:(html|pdf)}" },
+    handler = "1"
+  },
+  {
+    paths = { "/users/{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}" },
+    handler = "2"
+  },
+})
+assert("1" == router:match("/users/100/profile-2024.pdf"))
+assert("2", router:match("/users/00000000-0000-0000-0000-000000000000"))
+```
 
 ## 🧠 Data Structure and Implementation
 
@@ -215,7 +240,6 @@ router.trie = /                   nil
                  └─{catchall}     { "/src/{*filename}",      *<table 3> }
 ```
 
-
 ## 🚀 Benchmarks
 
 #### Usage
@@ -234,15 +258,16 @@ $ make bench
 
 #### Results
 
-| TEST CASE               | Router number | nanoseconds / op | QPS        | RSS          |
-| ----------------------- |---------------|------------------|------------|--------------|
-| static path             | 100000        | 0.0129826        | 77,026,173 | 65.25 MB     |
-| simple variable         | 100000        | 0.0802077        | 12,467,630 | 147.52 MB    |
-| simple variable         | 1000000       | 0.084604         | 11,819,772 | 1381.47 MB   |
-| simple prefix           | 100000        | 0.0713651        | 14,012,451 | 147.47 MB    |
-| complex variable        | 100000        | 0.914117         | 1,093,951  | 180.30 MB    |
-| simple variable binding | 100000        | 0.21054          | 4,749,691  | 147.28 MB    |
-| github                  | 609           | 0.375829         | 2,660,784  | 2.72 MB      |
+| test case               | route number | ns/op     | OPS        | RSS        |
+|-------------------------|--------------|-----------|------------|------------|
+| static path             | 100000       | 0.0171333 | 58,365,872 | 48.69 MB   |
+| simple variable         | 100000       | 0.0844033 | 11,847,877 | 99.97 MB   |
+| simple variable         | 1000000      | 0.087095  | 11,481,675 | 1000.41 MB |
+| simple prefix           | 100000       | 0.0730344 | 13,692,177 | 99.92 MB   |
+| simple regex            | 100000       | 0.14444   | 6,923,289  | 126.64 MB  |
+| complex variable        | 100000       | 0.858975  | 1,164,178  | 140.08 MB  |
+| simple variable binding | 100000       | 0.1843245 | 5,425,214  | 99.94 MB   |
+| github                  | 609          | 0.38436   | 2,601,727  | 2.69 MB    |
 
 <details>
 <summary>Expand output</summary>
@@ -252,79 +277,90 @@ RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/static-p
 ========== static path ==========
 routes  :	100000
 times   :	10000000
-elapsed :	0.129826 s
-QPS     :	77026173
-ns/op   :	0.0129826 ns
+elapsed :	0.171333 s
+QPS     :	58365872
+ns/op   :	0.0171333 ns
 path    :	/50000
 handler :	50000
-Memory  :	65.25 MB
+Memory  :	48.69 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable.lua
 ========== variable ==========
 routes  :	100000
 times   :	10000000
-elapsed :	0.802077 s
-QPS     :	12467630
-ns/op   :	0.0802077 ns
+elapsed :	0.844033 s
+QPS     :	11847877
+ns/op   :	0.0844033 ns
 path    :	/1/foo
 handler :	1
-Memory  :	147.52 MB
+Memory  :	99.97 MB
 
 RADIX_ROUTER_ROUTES=1000000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable.lua
 ========== variable ==========
-routes  :       1000000
-times   :       10000000
-elapsed :       0.84604 s
-QPS     :       11819772
-ns/op   :       0.084604 ns
-path    :       /1/foo
-handler :       1
-Memory  :       1381.47 MB
+routes  :	1000000
+times   :	10000000
+elapsed :	0.870953 s
+QPS     :	11481675
+ns/op   :	0.0870953 ns
+path    :	/1/foo
+handler :	1
+Memory  :	1000.41 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-prefix.lua
 ========== prefix ==========
 routes  :	100000
 times   :	10000000
-elapsed :	0.713651 s
-QPS     :	14012451
-ns/op   :	0.0713651 ns
+elapsed :	0.730344 s
+QPS     :	13692177
+ns/op   :	0.0730344 ns
 path    :	/1/a
 handler :	1
-Memory  :	147.47 MB
+Memory  :	99.92 MB
+
+RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=1000000 luajit benchmark/simple-regex.lua
+========== regex ==========
+routes  :	100000
+times   :	1000000
+elapsed :	0.14444 s
+QPS     :	6923289
+ns/op   :	0.14444 ns
+path    :	/1/a
+handler :	1
+Memory  :	126.64 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=1000000 luajit benchmark/complex-variable.lua
 ========== variable ==========
 routes  :	100000
 times   :	1000000
-elapsed :	0.914117 s
-QPS     :	1093951
-ns/op   :	0.914117 ns
+elapsed :	0.858975 s
+QPS     :	1164178
+ns/op   :	0.858975 ns
 path    :	/aa/bb/cc/dd/ee/ff/gg/hh/ii/jj/kk/ll/mm/nn/oo/pp/qq/rr/ss/tt/uu/vv/ww/xx/yy/zz50000
 handler :	50000
-Memory  :	180.30 MB
+Memory  :	140.08 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable-binding.lua
 ========== variable ==========
 routes  :	100000
 times   :	10000000
-elapsed :	2.1054 s
-QPS     :	4749691
-ns/op   :	0.21054 ns
+elapsed :	1.843245 s
+QPS     :	5425214
+ns/op   :	0.1843245 ns
 path    :	/1/foo
 handler :	1
 params : name = foo
-Memory  :	147.28 MB
+Memory  :	99.94 MB
 
 RADIX_ROUTER_TIMES=1000000 luajit benchmark/github-routes.lua
 ========== github apis ==========
 routes  :	609
 times   :	1000000
-elapsed :	0.375829 s
-QPS     :	2660784
-ns/op   :	0.375829 ns
+elapsed :	0.38436 s
+QPS     :	2601727
+ns/op   :	0.38436 ns
 path    :	/repos/vm-001/lua-radix-router/import
 handler :	/repos/{owner}/{repo}/import
-Memory  :	2.72 MB
+Memory  :	2.69 MB
 ```
 
 </details>

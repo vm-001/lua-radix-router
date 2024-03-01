@@ -12,7 +12,7 @@ local parsers = {
 function Parser.new(style)
   local parser = parsers[style]
   if not parser then
-    return nil, "invalid style: " .. style
+    return nil, "unknown parser style: " .. style
   end
 
   return parser.new()

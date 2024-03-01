@@ -14,7 +14,8 @@ describe("parser", function()
         ["/aa/{var1}/cc/{var2}"] = { "/aa/", "{var1}", "/cc/", "{var2}" },
         ["/user/profile.{format}"] = { "/user/profile.", "{format}" },
         ["/user/{filename}.{format}"] = { "/user/", "{filename}", ".", "{format}" },
-        ["/aa/{name:[0-9]+}/{*suffix}"] = { "/aa/", "{name:[0-9]+}", "/", "{*suffix}" }
+        ["/aa/{name:[0-9]+}/{*suffix}"] = { "/aa/", "{name:[0-9]+}", "/", "{*suffix}" },
+        ["/user/{id:\\d+}/profile-{year:\\d{4}}.{format:(html|pdf)}"] = { "/user/", "{id:\\d+}", "/profile-", "{year:\\d{4}}", ".", "{format:(html|pdf)}"  },
       }
 
       for path, expected_tokens in pairs(tests) do
@@ -61,6 +62,43 @@ describe("parser", function()
         local params = {}
         parser:update(test.matched_path):bind_params(test.path, #test.path, params, true)
         assert.same(test.params, params, "assertion failed: " .. i)
+      end
+    end)
+    it("compile_regex()", function()
+      local tests = {
+        {
+          path = "/a/b/c",
+          regex = "^\\Q/a/b/c\\E$"
+        },
+        {
+          path = "/a/{b}/c/{d}",
+          regex = "^\\Q/a/\\E[^/]+\\Q/c/\\E[^/]+$"
+        },
+        {
+          path = "/a/{b:\\d+}/c/{d:\\d{3}}",
+          regex = "^\\Q/a/\\E\\d+\\Q/c/\\E\\d{3}$"
+        },
+        {
+          path = "/a/{*catchall}",
+          regex = "^\\Q/a/\\E.*$"
+        },
+        {
+          path = "/a/{b}/c/{*catchall}",
+          regex = "^\\Q/a/\\E[^/]+\\Q/c/\\E.*$"
+        },
+        {
+          path = "/a/{b:[a-z]+}/c/{*catchall}",
+          regex = "^\\Q/a/\\E[a-z]+\\Q/c/\\E.*$"
+        },
+        {
+          path = "/users/{id:\\d+}/profile-{year:\\d{4}}.{format:(html|pdf)}",
+          regex = "^\\Q/users/\\E\\d+\\Q/profile-\\E\\d{4}\\Q.\\E(html|pdf)$"
+        }
+      }
+      for i, test in pairs(tests) do
+        local parser = Parser.new("default")
+        local regex = parser:update(test.path):compile_regex()
+        assert.same(test.regex, regex, "assertion failed: " .. i)
       end
     end)
   end)

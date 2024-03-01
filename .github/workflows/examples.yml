@@ -1,9 +1,6 @@
 name: examples
 
 on:
-  pull_request:
-    paths-ignore:
-      - '**/*.md'
   push:
     branches:
     - main
@@ -39,3 +36,4 @@ jobs:
         run: |
           lua examples/example.lua
           lua examples/custom-matcher.lua
+          lua examples/regular-expression.lua

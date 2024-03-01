@@ -47,6 +47,7 @@ function _M:reset()
   self.anchor = 1
   self.pos = 1
   self.state = nil
+  self.bracket_depth = 0
 end
 
 
@@ -58,7 +59,8 @@ function _M:next()
   local char, token, token_type
   while self.pos <= self.path_n do
     char = byte(self.path, self.pos)
-    --print("pos: " .. self.pos .. "(" .. string.char(char) .. ")")
+    --local char_str = string.char(char)
+    --print("pos: " .. self.pos .. "(" .. char_str .. ")")
     if self.state == nil or self.state == STATES.static then
       if char == BYTE_LEFT_BRACKET then
         if self.state == STATES.static then
@@ -67,12 +69,18 @@ function _M:next()
           self.anchor = self.pos
         end
         self.state = STATES.variable_start
+        self.bracket_depth = 1
       else
         self.state = STATES.static
       end
     elseif self.state == STATES.variable_start then
-      if char == BYTE_RIGHT_BRACKET then
-        self.state = STATES.variable_end
+      if char == BYTE_LEFT_BRACKET then
+        self.bracket_depth = self.bracket_depth + 1
+      elseif char == BYTE_RIGHT_BRACKET then
+        self.bracket_depth = self.bracket_depth - 1
+        if self.bracket_depth == 0 then
+          self.state = STATES.variable_end
+        end
       end
     elseif self.state == STATES.variable_end then
       self.state = STATES.static
@@ -93,6 +101,7 @@ function _M:next()
   return token, self.token_type(token)
 end
 
+
 function _M:parse()
   self:reset()
 
@@ -108,6 +117,7 @@ function _M:parse()
   return tokens
 end
 
+
 function _M.token_type(token)
   if byte(token) == BYTE_LEFT_BRACKET and
     byte(token, #token) == BYTE_RIGHT_BRACKET then
@@ -120,15 +130,39 @@ function _M.token_type(token)
   return TOKEN_TYPES.literal
 end
 
-function _M.is_dynamic(path)
-  local patn_n = #path
-  for i = 1, patn_n do
-    local char = byte(path, i)
-    if char == BYTE_LEFT_BRACKET or char == BYTE_RIGHT_BRACKET then
-      return true
+
+local function parse_token_regex(token)
+  for i = 1, #token do
+    if byte(token, i) == BYTE_COLON then
+      return sub(token, i + 1, -2)
     end
   end
-  return false
+  return nil
+end
+
+
+-- compile path to regex pattern
+function _M:compile_regex()
+  local tokens = { "^" }
+
+  local token, token_type = self:next()
+  while token do
+    if token_type == TOKEN_TYPES.variable then
+      local pattern = parse_token_regex(token) or "[^/]+"
+      table.insert(tokens, pattern)
+    elseif token_type == TOKEN_TYPES.catchall then
+      table.insert(tokens, ".*")
+    else
+      -- quote the literal token
+      table.insert(tokens, "\\Q")
+      table.insert(tokens, token)
+      table.insert(tokens, "\\E")
+    end
+    token, token_type = self:next()
+  end
+  table.insert(tokens, "$")
+
+  return table.concat(tokens)
 end
 
 function _M:params()
@@ -239,5 +273,41 @@ function _M:bind_params(req_path, req_path_n, params, trailing_slash_mode)
     end
   end
 end
+
+
+local function contains_regex(path)
+  local bracket_depth = 0
+
+  for i = 1, #path do
+    local char = byte(path, i)
+    if char == BYTE_LEFT_BRACKET then
+      bracket_depth = bracket_depth + 1
+    elseif char == BYTE_RIGHT_BRACKET then
+      bracket_depth = bracket_depth - 1
+    elseif char == BYTE_COLON and bracket_depth == 1 then
+      -- regex syntax {var:[^/]+}
+      -- return true only if the colon is in the first depth
+      return true
+    end
+  end
+
+  return false
+end
+
+
+local function is_dynamic(path)
+  local patn_n = #path
+  for i = 1, patn_n do
+    local char = byte(path, i)
+    if char == BYTE_LEFT_BRACKET or char == BYTE_RIGHT_BRACKET then
+      return true
+    end
+  end
+  return false
+end
+
+
+_M.contains_regex = contains_regex
+_M.is_dynamic = is_dynamic
 
 return _M

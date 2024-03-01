@@ -88,7 +88,7 @@ describe("Router", function()
 
       local router, err = Router.new({}, { matcher_names = { "inexistent" } })
       assert.is_nil(router)
-      assert.equal("invalid matcher name: inexistent", err)
+      assert.equal("invalid args opts: invalid matcher name: inexistent", err)
     end)
   end)
   describe("match", function()
@@ -478,6 +478,60 @@ describe("Router", function()
       binding = {}
       assert.equal("6", router:match("/ddsuffix", ctx, binding))
       assert.same({ cat = "suffix" }, binding)
+    end)
+  end)
+  describe("regex", function()
+    it("sanity", function()
+      local router = Router.new({
+        {
+          paths = { "/a/{b:\\d{3}}/c" },
+          handler = "/a/{b:\\d{3}}/c",
+        },
+        {
+          paths = { "/a/{b:\\d+}/c" },
+          handler = "/a/{b:\\d+}/c",
+        },
+        {
+          paths = { "/a/{b:[a-z]+}/c" },
+          handler = "/a/{b:[a-z]+}/c",
+        },
+        {
+          paths = { "/a/{b:[^/]+}/c" },
+          handler = "/a/{b:[^/]+}/c",
+        },
+        {
+          paths = { "/users/{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}" },
+          handler = "1"
+        },
+        {
+          paths = { "/users/{id:\\d+}/profile-{year:\\d{4}}.{format:(html|pdf)}" },
+          handler = "2",
+        },
+        {
+          paths = { "/escape/{var}/{var1:[a-z]+}|{var2:[A-Z]+}|{var3:\\d+}|{var4:(html|pdf)}" },
+          handler = "3",
+        },
+      })
+      assert.equal("/a/{b:\\d+}/c", router:match("/a/2024/c"))
+      assert.equal("/a/{b:\\d{3}}/c", router:match("/a/123/c"))
+      assert.equal("/a/{b:[a-z]+}/c", router:match("/a/abc/c"))
+      assert.equal("/a/{b:[^/]+}/c", router:match("/a/abc0/c"))
+
+      -- /users/{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}
+      assert.equal("1", router:match("/users/48c3d30b-ef4a-46ce-b860-a2c445f27b93"))
+      assert.equal("1", router:match("/users/00000000-0000-0000-0000-000000000000"))
+      assert.equal(nil, router:match("/users/0abcdefg"))
+      assert.equal(nil, router:match("/users/00000000-0000-0000-0000-00000000000"))
+
+      -- /users/{id:\\d+}/profile-{year:\\d{4}}.{format:html|pdf}
+      assert.equal("2", router:match("/users/123/profile-2024.html"))
+      assert.equal("2", router:match("/users/123/profile-2024.pdf"))
+      assert.equal(nil, router:match("/users/abc/profile-2024.html"))
+      assert.equal(nil, router:match("/users/123/profile-123.html"))
+      assert.equal(nil, router:match("/users/123/profile-2024.jpg"))
+
+      -- /escape/{var}/{var1:[a-z]+}|{var2:[A-Z]+}|{var3:\\d+}|{var4:(html|pdf)}
+      assert.equal("3", router:match("/escape/var/aaa|AAA|111|html"))
     end)
   end)
   describe("matching order", function()

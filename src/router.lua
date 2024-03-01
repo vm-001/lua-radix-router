@@ -15,12 +15,14 @@ local ipairs = ipairs
 local str_byte = string.byte
 local str_sub = string.sub
 local idx = constants.node_indexs
+local regex_test = utils.regex_test
 
 local BYTE_SLASH = str_byte("/")
 local EMPTY = utils.readonly({})
 
 local Router = {}
 local mt = { __index = Router }
+
 
 local function add_route(self, path, route)
   local path_route = { path, route }
@@ -57,6 +59,10 @@ local function add_route(self, path, route)
       return route1:compare(route2)
     end)
   end, self.parser)
+
+  if self.parser.contains_regex(path) then
+    self.regexs[path] = self.parser:update(path):compile_regex()
+  end
 end
 
 
@@ -85,20 +91,18 @@ function Router.new(routes, opts)
 
   local matcher, err = Matcher.new(options.matcher_names, options.matchers)
   if err then
-    return nil, err
+    return nil, "invalid args opts: " .. err
   end
 
   local self = {
     options = options,
     parser = Parser.new("default"),
     static = {},
+    regexs = {},
+    regexs_cache = {},
     trie = Trie.new(),
     iterator = Iterator.new(options),
     matcher = matcher,
-  }
-
-  local route_opts = {
-    parser = self.parser
   }
 
   for i, route in ipairs(routes or EMPTY) do
@@ -106,7 +110,8 @@ function Router.new(routes, opts)
     if not ok then
       return nil, "unable to process route(index " .. i .. "): " .. err
     end
-    local route_t, err = Route.new(route, route_opts)
+
+    local route_t, err = Route.new(route)
     if err then
       return nil, "invalid route(index " .. i .. "): " .. err
     end
@@ -120,23 +125,26 @@ function Router.new(routes, opts)
 end
 
 
-local function find_route(matcher, routes, ctx, matched)
-  if routes[0] == 1 then
-    local route = routes[1][2]
-    if matcher:match(route, ctx, matched) then
-      return route, routes[1][1]
-    end
-    return nil, nil
-  end
-
+local function find_route(self, path, routes, ctx, matched, evaluate_regex)
   for n = 1, routes[0] do
+    local route_path = routes[n][1]
     local route = routes[n][2]
-    if matcher:match(route, ctx, matched) then
-      return route, routes[n][1]
+    local regex_matched = true
+    if evaluate_regex then
+      local regex = self.regexs[route_path]
+      if regex then
+        regex_matched = regex_test(path, regex, self.regexs_cache)
+      end
+    end
+    if regex_matched and self.matcher:match(route, ctx, matched) then
+      if matched then
+        matched.path = route_path
+      end
+      return route, route_path
     end
   end
 
-  return nil, nil
+  return nil
 end
 
 
@@ -155,15 +163,11 @@ function Router:match(path, ctx, params, matched)
 
   local trailing_slash_match = self.options.trailing_slash_match
   local matched_route, matched_path
-  local matcher = self.matcher
 
   local routes = self.static[path]
   if routes then
-    matched_route, matched_path = find_route(matcher, routes, ctx, matched)
+    matched_route, matched_path = find_route(self, path, routes, ctx, matched)
     if matched_route then
-      if matched then
-        matched.path = matched_path
-      end
       return matched_route.handler
     end
   end
@@ -175,11 +179,8 @@ function Router:match(path, ctx, params, matched)
       routes = self.static[path .. "/"]
     end
     if routes then
-      matched_route, matched_path = find_route(matcher, routes, ctx, matched)
+      matched_route, matched_path = find_route(self, path, routes, ctx, matched)
       if matched_route then
-        if matched then
-          matched.path = matched_path
-        end
         return matched_route.handler
       end
     end
@@ -193,11 +194,8 @@ function Router:match(path, ctx, params, matched)
     local values, count = self.iterator:find(node, state_path, state_path_n)
     if values then
       for n = count, 1, -1 do
-        matched_route, matched_path = find_route(matcher, values[n], ctx, matched)
+        matched_route, matched_path = find_route(self, path, values[n], ctx, matched, true)
         if matched_route then
-          if matched then
-            matched.path = matched_path
-          end
           break
         end
       end

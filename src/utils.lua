@@ -1,11 +1,16 @@
+--- Utility functions.
+-- Some of the functions have jit implementation for better performance.
+--
+-- @module radix-router.utils
 local str_byte = string.byte
 local math_min = math.min
 local type = type
 
 local is_luajit = type(_G.jit) == "table"
+-- print("luajit enabled: " .. tostring(is_luajit))
 
+--- clear a table
 local clear_table
-local new_table
 do
   local ok
   ok, clear_table = pcall(require, "table.clear")
@@ -17,9 +22,16 @@ do
       end
     end
   end
+end
+
+
+--- allocate a pre-sized table
+local new_table
+do
+  local ok
   ok, new_table = pcall(require, "table.new")
   if not ok then
-    new_table = function(narr , nrec)
+    new_table = function(narr, nrec)
       return {}
     end
   end
@@ -130,6 +142,32 @@ local function readonly(t)
   })
 end
 
+--- test a string whether matches a regex pattern.
+local regex_test
+do
+  if ngx and ngx.re then
+    -- print("regex_test(ngx.re.find)")
+    local ngx_re_find = ngx.re.find
+    regex_test = function(str, regex)
+      local from, to = ngx_re_find(str, regex, "jo")
+      return from == 1 and to == #str
+    end
+  else
+    -- print("regex_test(rex_pcre2)")
+    local lrex = require "rex_pcre2"
+    regex_test = function(str, regex, cache)
+      local compiled = cache[regex]
+      if not compiled then
+        compiled = lrex.new(regex)
+        compiled:jit_compile()
+        cache[regex] = compiled
+      end
+      local from, to = compiled:find(str)
+      return from == 1 and to == #str
+    end
+  end
+end
+
 
 return {
   lcp = lcp,
@@ -139,4 +177,5 @@ return {
   new_table = new_table,
   is_luajit = is_luajit,
   readonly = readonly,
+  regex_test = regex_test,
 }
