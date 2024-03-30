@@ -1,0 +1,141 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lua-Radix-Router</title>
+    <style>
+        .container {
+            margin-top: 100px;
+            display: flex;
+            justify-items: center;
+            justify-content: center;
+        }
+        .circle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100px;
+            height: 100px;
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='100' ry='100' stroke='%236D6D6DFF' stroke-width='2' stroke-dasharray='4' stroke-dashoffset='100' stroke-linecap='butt'/%3e%3c/svg%3e");
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .blue-circle {
+            width: 78px;
+            height: 78px;
+            background-color: rgb(5, 0, 109);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .small-circle {
+            width: 21px;
+            height: 21px;
+            background-color: rgb(5, 0, 109);
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .small-white-circle {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 12px;
+        }
+
+        .R {
+            position: absolute;
+            width: 50px;
+            left: 50%;
+            margin-left: -24px;
+            top: 28%;
+            text-align: center;
+            align-content: center;
+        }
+
+        .R-text {
+            margin-left: 18px;
+            width: 58px;
+            align-content: center;
+        }
+
+        .text {
+            padding-top: 6px;
+            margin-left: -6px;
+            align-content: center;
+            font-weight: 500;
+            font-size: 60px;
+            left: 142px;
+            top: 30px;
+            color: rgb(5, 0, 109);
+        }
+
+        .line-container {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            left: 0;
+            top: 46px;
+        }
+
+        .white-line {
+            right: 4px;
+            position: absolute;
+            /*transform: skew(-45deg);*/
+            border-bottom: 2px solid white;
+            border-left: 2px solid transparent;
+        }
+
+        .parallelogram {
+            border-bottom: 10px solid red;
+            border-left: 50px solid transparent;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="circle-container">
+        <div class="blue-circle">
+            <!--            <div class="small-white-circle"></div>-->
+        </div>
+
+        <div class="small-circle"></div>
+        <!--        <div class="R">R</div>-->
+        <!--        <img src="R.svg" style="position: absolute; width: 60px">-->
+        <!--        <div class="line-container">-->
+        <!--            <div class="white-line" style="top:0px;width:13px"></div>-->
+        <!--            <div class="white-line" style="top:5px;width:19px"></div>-->
+        <!--            <div class="white-line" style="top:10px;width:8px"></div>-->
+        <!--        </div>-->
+        <div class="R">
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.0" viewBox="0 0 1390.000000 1222.000000"
+                 preserveAspectRatio="xMidYMid meet" style="background-color: white">
+                <g transform="translate(0.000000,1222.000000) scale(0.100000,-0.100000)" fill="#05006D" stroke="white">
+                    <path d="M0 6110 l0 -6110 6950 0 6950 0 0 6110 0 6110 -6950 0 -6950 0 0 -6110z m7905 5488 c405 -60 662 -124 975 -243 1157 -440 2070 -1410 2439 -2590 180 -577 234 -1220 150 -1800 -127 -879 -528 -1677 -1158 -2305 -317 -316 -632 -545 -1044 -760 l-138 -72 19 -22 c10 -11 500 -586 1087 -1276 588 -690 1258 -1477 1489 -1748 232 -272 422 -498 424 -503 2 -5 -553 -9 -1377 -9 l-1380 0 -1267 1488 c-698 818 -1309 1535 -1358 1594 l-91 107 -857 1 c-680 0 -858 3 -857 13 0 6 181 426 402 932 l402 920 935 6 c1035 6 1003 4 1280 75 444 114 844 367 1141 723 629 753 685 1822 138 2641 -365 547 -968 908 -1619 969 -88 9 -390 11 -1024 9 l-899 -3 -320 -1142 c-175 -629 -317 -1150 -313 -1158 5 -13 85 -15 641 -15 349 0 635 -4 635 -8 0 -5 -456 -928 -1013 -2053 -558 -1124 -1350 -2723 -1762 -3554 -411 -831 -753 -1514 -758 -1520 -6 -6 -8 11 -4 50 20 221 439 6844 434 6858 -6 16 -56 17 -697 17 -654 0 -691 1 -686 18 2 9 275 976 606 2147 331 1172 608 2154 616 2183 l16 52 2341 -3 c2098 -3 2353 -5 2452 -19z"></path>
+                </g>
+            </svg>
+        </div>
+    </div>
+    <div class="R-text">
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.0" viewBox="0 0 1390.000000 1222.000000"
+             preserveAspectRatio="xMidYMid meet" style="background: #05006D;">
+            <g transform="translate(0.000000,1222.000000) scale(0.100000,-0.100000)" fill="white" stroke="black">
+                <path d="M0 6110 l0 -6110 6950 0 6950 0 0 6110 0 6110 -6950 0 -6950 0 0 -6110z m7905 5488 c405 -60 662 -124 975 -243 1157 -440 2070 -1410 2439 -2590 180 -577 234 -1220 150 -1800 -127 -879 -528 -1677 -1158 -2305 -317 -316 -632 -545 -1044 -760 l-138 -72 19 -22 c10 -11 500 -586 1087 -1276 588 -690 1258 -1477 1489 -1748 232 -272 422 -498 424 -503 2 -5 -553 -9 -1377 -9 l-1380 0 -1267 1488 c-698 818 -1309 1535 -1358 1594 l-91 107 -857 1 c-680 0 -858 3 -857 13 0 6 181 426 402 932 l402 920 935 6 c1035 6 1003 4 1280 75 444 114 844 367 1141 723 629 753 685 1822 138 2641 -365 547 -968 908 -1619 969 -88 9 -390 11 -1024 9 l-899 -3 -320 -1142 c-175 -629 -317 -1150 -313 -1158 5 -13 85 -15 641 -15 349 0 635 -4 635 -8 0 -5 -456 -928 -1013 -2053 -558 -1124 -1350 -2723 -1762 -3554 -411 -831 -753 -1514 -758 -1520 -6 -6 -8 11 -4 50 20 221 439 6844 434 6858 -6 16 -56 17 -697 17 -654 0 -691 1 -686 18 2 9 275 976 606 2147 331 1172 608 2154 616 2183 l16 52 2341 -3 c2098 -3 2353 -5 2452 -19z"></path>
+            </g>
+        </svg>
+    </div>
+    <div class="text">adix Router</div>
+</div>
+
+
+</body>
+</html>
