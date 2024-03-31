@@ -167,7 +167,7 @@ local router = Router.new({
   },
 })
 assert("1" == router:match("/users/100/profile-2024.pdf"))
-assert("2", router:match("/users/00000000-0000-0000-0000-000000000000"))
+assert("2" == router:match("/users/00000000-0000-0000-0000-000000000000"))
 ```
 
 ## 🧠 Data Structure and Implementation
