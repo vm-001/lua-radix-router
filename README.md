@@ -23,7 +23,7 @@ The router can be run in different runtimes such as Lua, LuaJIT, or OpenResty.
 
 **Variable binding:** Stop manually parsing the URL, let the router injects the binding variables for you.
 
-**Best performance:** The fastest router in Lua/LuaJIT. See [Benchmarks](#-Benchmarks).
+**Best performance:** The fastest router in Lua/LuaJIT and open-source API Gateways. See [Benchmarks](#-Benchmarks) and [Routing Benchmark](https://github.com/vm-001/gateways-routing-benchmark) in different API Gateways.
 
 **OpenAPI friendly:** OpenAPI(Swagger) is fully compatible.
 
