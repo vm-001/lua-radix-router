@@ -14,6 +14,8 @@ The router is optimized for high performance. It combines HashTable(O(1)) and Co
 
 The router can be run in different runtimes such as Lua, LuaJIT, or OpenResty.
 
+This library is considered production ready.
+
 ## 🔨 Features
 
 **Patterned path:** You can define named or unnamed patterns in path with pattern syntax "{}" and "{*}"
