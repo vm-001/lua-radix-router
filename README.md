@@ -279,21 +279,21 @@ $ make bench
 
 #### Environments
 
-- Apple MacBook Pro(M1 Pro), 32GB
-- LuaJIT 2.1.1700008891
+- MacBook Pro(M4 Pro), 24GB
+- LuaJIT 2.1.1731601260
 
 #### Results
 
-| test case               | route number | ns/op     | OPS        | RSS        |
-|-------------------------|--------------|-----------|------------|------------|
-| static path             | 100000       | 0.0171333 | 58,365,872 | 48.69 MB   |
-| simple variable         | 100000       | 0.0844033 | 11,847,877 | 99.97 MB   |
-| simple variable         | 1000000      | 0.087095  | 11,481,675 | 1000.41 MB |
-| simple prefix           | 100000       | 0.0730344 | 13,692,177 | 99.92 MB   |
-| simple regex            | 100000       | 0.14444   | 6,923,289  | 126.64 MB  |
-| complex variable        | 100000       | 0.858975  | 1,164,178  | 140.08 MB  |
-| simple variable binding | 100000       | 0.1843245 | 5,425,214  | 99.94 MB   |
-| github                  | 609          | 0.38436   | 2,601,727  | 2.69 MB    |
+| test case               | route number | ns / op | OPS         | RSS         |
+|-------------------------|--------------|---------|-------------|-------------|
+| static path             | 100000       | 8.70    | 114,984,822 | 48.88 MB    |
+| simple variable         | 100000       | 64.60   | 15,480,954  | 102.55 MB   |
+| simple variable         | 1000000      | 54.78   | 18,257,670  | 976.17 MB   |
+| simple prefix           | 100000       | 50.24   | 19,905,845  | 100.38 MB   |
+| simple regex            | 100000       | 96.72   | 10,338,909  | 111.66 MB   |
+| complex variable        | 100000       | 622.11  | 1,607,443   | 155.05 MB   |
+| simple variable binding | 100000       | 123.16  | 8,119,565   | 100.36 MB   |
+| github                  | 609          | 270.58  | 3,695,778   | 2.88 MB     |
 
 <details>
 <summary>Expand output</summary>
@@ -301,92 +301,93 @@ $ make bench
 ```
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/static-paths.lua
 ========== static path ==========
-routes  :	100000
-times   :	10000000
-elapsed :	0.171333 s
-QPS     :	58365872
-ns/op   :	0.0171333 ns
-path    :	/50000
-handler :	50000
-Memory  :	48.69 MB
+routes  :       100000
+times   :       10000000
+elapsed :       0.086968 s
+ns/op   :       8.6968 ns
+OPS     :       114984822
+path    :       /50000
+handler :       50000
+Memory  :       48.88 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable.lua
 ========== variable ==========
-routes  :	100000
-times   :	10000000
-elapsed :	0.844033 s
-QPS     :	11847877
-ns/op   :	0.0844033 ns
-path    :	/1/foo
-handler :	1
-Memory  :	99.97 MB
+routes  :       100000
+times   :       10000000
+elapsed :       0.645955 s
+ns/op   :       64.5955 ns
+OPS     :       15480954
+path    :       /1/foo
+handler :       1
+Memory  :       102.55 MB
 
 RADIX_ROUTER_ROUTES=1000000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable.lua
 ========== variable ==========
-routes  :	1000000
-times   :	10000000
-elapsed :	0.870953 s
-QPS     :	11481675
-ns/op   :	0.0870953 ns
-path    :	/1/foo
-handler :	1
-Memory  :	1000.41 MB
+routes  :       1000000
+times   :       10000000
+elapsed :       0.547715 s
+ns/op   :       54.7715 ns
+OPS     :       18257670
+path    :       /1/foo
+handler :       1
+Memory  :       976.17 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-prefix.lua
 ========== prefix ==========
-routes  :	100000
-times   :	10000000
-elapsed :	0.730344 s
-QPS     :	13692177
-ns/op   :	0.0730344 ns
-path    :	/1/a
-handler :	1
-Memory  :	99.92 MB
+routes  :       100000
+times   :       10000000
+elapsed :       0.502365 s
+ns/op   :       50.2365 ns
+OPS     :       19905845
+path    :       /1/a
+handler :       1
+Memory  :       100.38 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=1000000 luajit benchmark/simple-regex.lua
 ========== regex ==========
-routes  :	100000
-times   :	1000000
-elapsed :	0.14444 s
-QPS     :	6923289
-ns/op   :	0.14444 ns
-path    :	/1/a
-handler :	1
-Memory  :	126.64 MB
+routes  :       100000
+times   :       1000000
+elapsed :       0.096722 s
+ns/op   :       96.722 ns
+OPS     :       10338909
+path    :       /1/a
+handler :       1
+Memory  :       111.66 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=1000000 luajit benchmark/complex-variable.lua
 ========== variable ==========
-routes  :	100000
-times   :	1000000
-elapsed :	0.858975 s
-QPS     :	1164178
-ns/op   :	0.858975 ns
-path    :	/aa/bb/cc/dd/ee/ff/gg/hh/ii/jj/kk/ll/mm/nn/oo/pp/qq/rr/ss/tt/uu/vv/ww/xx/yy/zz50000
-handler :	50000
-Memory  :	140.08 MB
+routes  :       100000
+times   :       1000000
+elapsed :       0.622106 s
+ns/op   :       622.106 ns
+OPS     :       1607443
+path    :       /aa/bb/cc/dd/ee/ff/gg/hh/ii/jj/kk/ll/mm/nn/oo/pp/qq/rr/ss/tt/uu/vv/ww/xx/yy/zz50000
+handler :       50000
+Memory  :       155.05 MB
 
 RADIX_ROUTER_ROUTES=100000 RADIX_ROUTER_TIMES=10000000 luajit benchmark/simple-variable-binding.lua
 ========== variable ==========
-routes  :	100000
-times   :	10000000
-elapsed :	1.843245 s
-QPS     :	5425214
-ns/op   :	0.1843245 ns
-path    :	/1/foo
-handler :	1
+routes  :       100000
+times   :       10000000
+elapsed :       1.231593 s
+ns/op   :       123.1593 ns
+OPS     :       8119565
+path    :       /1/foo
+handler :       1
 params : name = foo
-Memory  :	99.94 MB
+Memory  :       100.36 MB
 
 RADIX_ROUTER_TIMES=1000000 luajit benchmark/github-routes.lua
 ========== github apis ==========
-routes  :	609
-times   :	1000000
-elapsed :	0.38436 s
-QPS     :	2601727
-ns/op   :	0.38436 ns
-path    :	/repos/vm-001/lua-radix-router/import
-handler :	/repos/{owner}/{repo}/import
-Memory  :	2.69 MB
+routes  :       609
+times   :       1000000
+elapsed :       0.270579 s
+ns/op   :       270.579 ns
+OPS     :       3695778
+path    :       /repos/vm-001/lua-radix-router/import
+handler :       /repos/{owner}/{repo}/import
+Memory  :       2.88 MB
+
 ```
 
 </details>
