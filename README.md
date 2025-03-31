@@ -246,6 +246,26 @@ router.trie = /                   nil
                  └─{catchall}     { "/src/{*filename}",      *<table 3> }
 ```
 
+## 🔍 Troubleshooting
+
+
+#### Could not find header file for PCRE2
+
+```
+Installing https://luarocks.org/lrexlib-pcre2-2.9.2-1.src.rock
+
+Error: Failed installing dependency: https://luarocks.org/lrexlib-pcre2-2.9.2-1.src.rock - Could not find header file for PCRE2
+```
+
+Try manually install `lrexlib-pcre2` (on macOS).
+
+```
+$ brew install pcre2
+$ ls /opt/homebrew/opt/pcre2/
+$ luarocks install lrexlib-pcre2 PCRE2_DIR=/opt/homebrew/opt/pcre2
+```
+
+
 ## 🚀 Benchmarks
 
 #### Usage
