@@ -17,14 +17,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        luaVersion: [ "5.2", "5.3", "5.4", "luajit-2.1.0-beta3", "luajit-openresty" ]
+        luaVersion: [ "5.2", "5.3", "5.4", "luajit-2.1", "luajit-openresty" ]
 
     steps:
       - name: checkout source code
         uses: actions/checkout@v3
 
       - name: install Lua/LuaJIT
-        uses: leafo/gh-actions-lua@v8
+        uses: leafo/gh-actions-lua@v11
         with:
           luaVersion: ${{ matrix.luaVersion }}
 
@@ -67,18 +67,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        openrestyVersion: [ "1.19.9.1", "1.21.4.3", "1.25.3.1" ]
+        openrestyVersion: [ "1.19.9.2", "1.21.4.4", "1.25.3.2", "1.27.1.1" ]
 
     steps:
       - name: checkout source code
         uses: actions/checkout@v3
 
       - name: install Lua/LuaJIT
-        uses: leafo/gh-actions-lua@v8
+        uses: leafo/gh-actions-lua@v11
         with:
           luaVersion: "luajit-openresty"
 
-      - uses: leafo/gh-actions-openresty@v1
+      - uses: leafo/gh-actions-openresty@v2
         with:
           openrestyVersion: ${{ matrix.openrestyVersion }}
 
