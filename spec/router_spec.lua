@@ -142,25 +142,30 @@ describe("Router", function()
               handler = "2",
             },
             {
-              paths = { "/aa/{var1}/bb/{var2}" },
+              paths = { "/aa/{var1}/bb" },
               handler = "3",
             },
             {
-              paths = { "/bb/{var1}/cc/{var2}" },
+              paths = { "/aa/{var1}/bb/{var2}" },
               handler = "4",
             },
             {
-              paths = { "/bb/{var1}/cc/dd" },
+              paths = { "/bb/{var1}/cc/{var2}" },
               handler = "5",
+            },
+            {
+              paths = { "/bb/{var1}/cc/dd" },
+              handler = "6",
             }
           })
 
           assert.equal("1", router:match("/var1"))
           assert.equal("2", router:match("/aa/var1"))
-          assert.equal("3", router:match("/aa/var1/bb/var2"))
-          assert.equal("4", router:match("/bb/var1/cc/var2"))
+          assert.equal("3", router:match("/aa/var1/bb"))
+          assert.equal("4", router:match("/aa/var1/bb/var2"))
+          assert.equal("5", router:match("/bb/var1/cc/var2"))
           -- path /bb/var1/cc/dd overlap with handle 4
-          assert.equal("5", router:match("/bb/var1/cc/dd"))
+          assert.equal("6", router:match("/bb/var1/cc/dd"))
         end)
       end)
       describe("prefix path", function()
@@ -652,6 +657,10 @@ describe("Router", function()
           paths = { "/ww/{id}/" },
           handler = "3",
         },
+        {
+          paths = { "/zz/{id}/kk" },
+          handler = "4",
+        },
       }, options)
 
       assert.equal("static1", router:match("/static1/"))
@@ -664,9 +673,14 @@ describe("Router", function()
 
       -- matched when path has a extra trailing slash
       assert.equal("2", router:match("/zz/1/"))
+      -- matched when path has no extra trailing slash
+      assert.equal("2", router:match("/zz/1"))
       -- matched when path misses trailing slash
       assert.equal("3", router:match("/ww/1"))
+      -- matched when path something more at the end
+      assert.equal("4", router:match("/zz/1/kk"))
     end)
+
     it("with methods condition", function()
       local options = {
         trailing_slash_match = true,

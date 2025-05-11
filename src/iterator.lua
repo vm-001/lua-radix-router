@@ -112,13 +112,13 @@ function _M:find(node, path, path_n)
         self.values[matched_n] = node[5]
       end
 
-      -- case1: the node doesn't contians child to match to the path
+      -- case1: the node doesn't contains child to match to the path
       -- case2: the path is variable value, but current node doesn't have value
       if not_found then
         if trailing_slash_match and node[4] then
           -- look up the children to see if "/" child with value exists
           child = node[4]["/"]
-          if child and child[5] then
+          if child and child[2] == "/" and child[5] then
             matched_n = matched_n + 1
             self.values[matched_n] = child[5]
           end
