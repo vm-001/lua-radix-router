@@ -118,7 +118,7 @@ function _M:find(node, path, path_n)
         if trailing_slash_match and node[4] then
           -- look up the children to see if "/" child with value exists
           child = node[4]["/"]
-          if child and child[5] then
+          if child and child[2] == "/" and child[5] then
             matched_n = matched_n + 1
             self.values[matched_n] = child[5]
           end
