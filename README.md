@@ -2,7 +2,7 @@
     <img alt="special sponsor appwrite" src="./lua-radix-router.png" width="600">
 </p>
 
-# Lua-Radix-Router [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml) [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/examples.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/examples.yml) [![Coverage Status](https://coveralls.io/repos/github/vm-001/lua-radix-router/badge.svg)](https://coveralls.io/github/vm-001/lua-radix-router) ![Lua Versions](https://img.shields.io/badge/Lua-%205.2%20|%205.3%20|%205.4-blue.svg)
+# Lua-Radix-Router [![release](https://img.shields.io/github/v/release/vm-001/lua-radix-router?color=green)](https://github.com/vm-001/lua-radix-router/releases) [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/test.yml) [![Build Status](https://github.com/vm-001/lua-radix-router/actions/workflows/examples.yml/badge.svg)](https://github.com/vm-001/lua-radix-router/actions/workflows/examples.yml) [![Coverage Status](https://coveralls.io/repos/github/vm-001/lua-radix-router/badge.svg)](https://coveralls.io/github/vm-001/lua-radix-router) ![Lua Versions](https://img.shields.io/badge/Lua-%205.2%20|%205.3%20|%205.4-blue.svg)
 
 English | [中文](README.zh.md)
 
