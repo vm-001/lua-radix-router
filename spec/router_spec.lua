@@ -652,6 +652,14 @@ describe("Router", function()
           paths = { "/ww/{id}/" },
           handler = "3",
         },
+        {
+          paths = { "/aa/{var1}" },
+          handler = "4",
+        },
+        {
+          paths = { "/aa/{var1}/bb" },
+          handler = "5",
+        }
       }, options)
 
       assert.equal("static1", router:match("/static1/"))
@@ -665,7 +673,11 @@ describe("Router", function()
       -- matched when path has a extra trailing slash
       assert.equal("2", router:match("/zz/1/"))
       -- matched when path misses trailing slash
+
       assert.equal("3", router:match("/ww/1"))
+
+      assert.equal("4", router:match("/aa/var1"))
+      assert.equal("5", router:match("/aa/var1/bb"))
     end)
     it("with methods condition", function()
       local options = {
