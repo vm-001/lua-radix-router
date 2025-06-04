@@ -20,7 +20,7 @@ function Route.new(route)
     if str_byte(path) ~= BYTE_SLASH then
       return nil, "path must starts with /"
     end
-    local _, pattern_idx = str_find(path, "{%*[^}]*}", 0, false)
+    local _, pattern_idx = str_find(path, "{%*[^}]*}")
     if pattern_idx ~= nil and pattern_idx ~= #path then
       return nil, "invalid prefix pattern"
     end
