@@ -29,7 +29,9 @@ jobs:
           luaVersion: ${{ matrix.luaVersion }}
 
       - name: install LuaRocks
-        uses: leafo/gh-actions-luarocks@v4
+        uses: leafo/gh-actions-luarocks@v5
+        with:
+          luarocksVersion: "3.12.0"
 
       - name: install dependencies
         run: |
@@ -83,7 +85,9 @@ jobs:
           openrestyVersion: ${{ matrix.openrestyVersion }}
 
       - name: install LuaRocks
-        uses: leafo/gh-actions-luarocks@v4
+        uses: leafo/gh-actions-luarocks@v5
+        with:
+          luarocksVersion: "3.12.0"
 
       - name: install dependencies
         run: |

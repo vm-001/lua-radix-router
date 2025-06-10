@@ -56,6 +56,50 @@ describe("Router", function()
       })
       assert.is_nil(router)
       assert.equal("unable to process route(index 1): invalid methond", err)
+
+      router, err = Router.new({
+        {
+          paths = { "abc" },
+          handler = "abc",
+        },
+      })
+      assert.is_nil(router)
+      assert.equal("invalid route(index 1): path must starts with /", err)
+
+      router, err = Router.new({
+        {
+          paths = { "/a/{*b}/c" },
+          handler = "",
+        },
+      })
+      assert.is_nil(router)
+      assert.equal("invalid route(index 1): invalid prefix pattern", err)
+      router, err = Router.new({
+        {
+          paths = { "/a/{*}/c" },
+          handler = "",
+        },
+      })
+      assert.is_nil(router)
+      assert.equal("invalid route(index 1): invalid prefix pattern", err)
+      router, err = Router.new({
+        {
+          paths = { "/a/{*b}/{*c}" },
+          handler = "",
+        },
+      })
+      assert.is_nil(router)
+      assert.equal("invalid route(index 1): invalid prefix pattern", err)
+      router, err = Router.new({
+        {
+          paths = { "/a/{*}/{*}" },
+          handler = "",
+        },
+      })
+      assert.is_nil(router)
+      assert.equal("invalid route(index 1): invalid prefix pattern", err)
+
+
     end)
     it("new() with opts argument", function()
       local router, err = Router.new({}, {

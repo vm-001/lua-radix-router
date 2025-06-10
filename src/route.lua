@@ -4,6 +4,7 @@
 
 local ipairs = ipairs
 local str_byte = string.byte
+local str_find = string.find
 local BYTE_SLASH = str_byte("/")
 
 local Route = {}
@@ -17,7 +18,11 @@ function Route.new(route)
 
   for _, path in ipairs(route.paths) do
     if str_byte(path) ~= BYTE_SLASH then
-      return nil, "path must start with /"
+      return nil, "path must starts with /"
+    end
+    local _, pattern_idx = str_find(path, "{%*[^}]*}")
+    if pattern_idx ~= nil and pattern_idx ~= #path then
+      return nil, "invalid prefix pattern"
     end
   end
 
